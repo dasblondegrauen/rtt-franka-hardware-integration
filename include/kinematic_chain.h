@@ -86,6 +86,8 @@ class KinematicChain {
                                  const std::array<double, 6>& lower_force_thresholds,
                                  const std::array<double, 6>& upper_force_thresholds);
 
+    void setImpedanceBehavior(const std::array<double,7> & joint_imp,const std::array<double,6> & cart_imp);
+
  void setFilters(double joint_position_filter_frequency,
                        double joint_velocity_filter_frequency,
                        double cartesian_position_filter_frequency,
