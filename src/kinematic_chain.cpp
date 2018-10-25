@@ -9,7 +9,7 @@ KinematicChain::KinematicChain(const std::string &chain_name,
                                RTT::DataFlowInterface &ports_in,
                                std::unique_ptr < franka::Robot::Impl > franka_control)
     : kinematic_chain_name(chain_name),
-    ports(ports_in) {
+      ports(ports_in) {
     dof = joint_names.size();
     franka_model = std::make_unique<franka::Model>(franka_control->loadModel());
 
@@ -23,14 +23,14 @@ bool KinematicChain::initKinematicChain() {
     RTT::log(RTT::Info) << kinematic_chain_name << RTT::endlog();
     setFeedBack();
     setCollisionBehavior(
-        {{1000.0, 1000.0, 1000.0, 1000.0, 1000.0, 1000.0, 1000.0}}, {{1000.0, 1000.0, 1000.0, 1000.0, 1000.0, 1000.0, 1000.0}},
-        {{1000.0, 1000.0, 1000.0, 1000.0, 1000.0, 1000.0}}, {{1000.0, 1000.0, 1000.0, 1000.0, 1000.0, 1000.0}});
+    {{1000.0, 1000.0, 1000.0, 1000.0, 1000.0, 1000.0, 1000.0}}, {{1000.0, 1000.0, 1000.0, 1000.0, 1000.0, 1000.0, 1000.0}},
+    {{1000.0, 1000.0, 1000.0, 1000.0, 1000.0, 1000.0}}, {{1000.0, 1000.0, 1000.0, 1000.0, 1000.0, 1000.0}});
     setFilters(
-      1000, 1000,
-      1000, 1000,
-      1000);
-    //TODO testgin, values below should be set from srdf file
-//    setImpedanceBehavior({{3000, 3000, 3000, 2500, 2500, 2000, 2000}}, {{3000, 3000, 3000, 300, 300, 300}});
+                1000, 1000,
+                1000, 1000,
+                1000);
+    //TODO testing, values below should be set from srdf file
+    setImpedanceBehavior({{3000, 3000, 3000, 2500, 2500, 2000, 2000}}, {{3000, 3000, 3000, 300, 300, 300}});
 
     return true;
 }
@@ -66,11 +66,12 @@ bool KinematicChain::setControlMode(const std::string &controlMode) {
     // }
     RTT::log(RTT::Info) << "KC set control mode " << this->kinematic_chain_name << RTT::endlog();
 
-    motion_command.q_c.fill(0);
+    motion_command = {};
+    /*motion_command.q_c.fill(0);
     motion_command.dq_c.fill(0);
     motion_command.O_T_EE_c.fill(0);
     motion_command.O_dP_EE_c.fill(0);
-    motion_command.elbow_c.fill(0);
+    motion_command.elbow_c.fill(0);*/
 
     control_command.tau_J_d.fill(0);
     RTT::log(RTT::Info) << "fill 0 end " << franka::ControlModeMap.find(franka::ControlModes::Torque)->second << RTT::endlog();
@@ -101,7 +102,7 @@ bool KinematicChain::setControlMode(const std::string &controlMode) {
                                                                                        this->ports,
                                                                                        franka::ControlModes::Position,
                                                                                        [](rstrt::kinematics::JointAngles &input) -> Eigen::VectorXf& {return input.angles;});
-        RTT::log(RTT::Info) << "Set control mode to position" << RTT::endlog();        
+        RTT::log(RTT::Info) << "Set control mode to position" << RTT::endlog();
         current_control_input_var = &(motion_command.q_c);
     } else {
         RTT::log(RTT::Error) << "Control Mode has not been implemented " << controlMode << RTT::endlog();
@@ -121,13 +122,13 @@ bool KinematicChain::startKinematicChain() {
         break;
     case franka::ControlModes::Velocity:
         RTT::log(RTT::Info) << "STARTED KINEMATIC CHAIN IN MODE: " << franka::ControlModeMap.find(franka::ControlModes::Velocity)->second << RTT::endlog();
-        // TODO?
         motion_id = franka_control->startMotion(research_interface::robot::Move::ControllerMode::kJointImpedance, franka::MotionGeneratorTraits<franka::JointVelocities>::kMotionGeneratorMode, kDefaultDeviation, kDefaultDeviation);
+        motion_command.dq_c = franka_state.dq;
         break;
     case franka::ControlModes::Position:
         RTT::log(RTT::Info) << "STARTED KINEMATIC CHAIN IN MODE: " << franka::ControlModeMap.find(franka::ControlModes::Position)->second << RTT::endlog();
-        // TODO?
         motion_id = franka_control->startMotion(research_interface::robot::Move::ControllerMode::kJointImpedance, franka::MotionGeneratorTraits<franka::JointPositions>::kMotionGeneratorMode, kDefaultDeviation, kDefaultDeviation);
+        motion_command.q_c = franka_state.q;
         break;
     default:
         return false;
@@ -142,7 +143,7 @@ bool KinematicChain::sense() {
     // RTT::log(RTT::Info) << "MAP!!" << RTT::endlog();
     jf->joint_feedback.angles = Eigen::Map<Eigen::VectorXd>(franka_state.q.data(), dof).cast<float>();
     jf->joint_feedback.velocities = Eigen::Map<Eigen::VectorXd>(franka_state.dq.data(), dof).cast<float>();
-    jf->joint_feedback.torques = Eigen::Map<Eigen::VectorXd>(franka_state.tau_J.data(), dof).cast<float>();        
+    jf->joint_feedback.torques = Eigen::Map<Eigen::VectorXd>(franka_state.tau_J.data(), dof).cast<float>();
 
     // RTT::log(RTT::Info) << "MAP FINISH!!" << RTT::endlog();
     if (inertia_feedback->connected())
@@ -160,15 +161,15 @@ bool KinematicChain::sense() {
     //RTT::log(RTT::Info) << "WRITE! Control command success rate: " << franka_state.control_command_success_rate << RTT::endlog();
     jf->write();
     if(franka_state.control_command_success_rate>0.8){
-	    if (inertia_feedback->connected())
-	        inertia_feedback->write();
-	    if (coriolis_feedback->connected())
-	        coriolis_feedback->write();
-	    if (gravity_feedback->connected())
-	        gravity_feedback->write();
-	    if (jacobian_feedback->connected())
-	        jacobian_feedback->write();
-	}
+        if (inertia_feedback->connected())
+            inertia_feedback->write();
+        if (coriolis_feedback->connected())
+            coriolis_feedback->write();
+        if (gravity_feedback->connected())
+            gravity_feedback->write();
+        if (jacobian_feedback->connected())
+            jacobian_feedback->write();
+    }
 
     return true;
 }
@@ -191,14 +192,14 @@ void KinematicChain::stop() try {
     //franka_control->cancelMotion(motion_id);
     if(current_control_mode == franka::ControlModes::Torque) {
         franka_control->finishMotion(motion_id, &motion_command, &control_command);
-    } else {        
+    } else {
         franka_control->finishMotion(motion_id, &motion_command, nullptr);
     }
 } catch (...) {
-    try {
-        franka_control->cancelMotion(motion_id);
-    } catch (...) {}
-    throw;
+try {
+franka_control->cancelMotion(motion_id);
+} catch (...) {}
+throw;
 }
 
 void KinematicChain::move() try {
@@ -209,8 +210,7 @@ void KinematicChain::move() try {
         } else {
             franka_state = franka_control->update(&motion_command, nullptr);
         }
-    }else{
-        //franka_state = franka_control->update();
+    } else {
         franka_state = franka_control->update(nullptr, nullptr);
     }
     // }
@@ -220,6 +220,9 @@ void KinematicChain::move() try {
     throw;
 } catch (const std::exception &exc) {
     RTT::log(RTT::Error)<<exc.what()<<RTT::endlog();
+    RTT::log(RTT::Error) << "Measured/desired position: " << franka_state.q.at(0) << "/" << franka_state.q_d.at(0)
+                         << "\nMeasured/desired velocity: " << franka_state.dq.at(0) << "/" << franka_state.dq_d.at(0)
+                         << "\nDesired acceleration: " << franka_state.ddq_d.at(0) << RTT::endlog();
     //try {
     //    franka_control->cancelMotion(motion_id);
     //} catch (...) {}
@@ -227,13 +230,13 @@ void KinematicChain::move() try {
 }
 
 void KinematicChain::setCollisionBehavior(const std::array<double, 7>& lower_torque_thresholds,
-                                 const std::array<double, 7>& upper_torque_thresholds,
-                                 const std::array<double, 6>& lower_force_thresholds,
-                                 const std::array<double, 6>& upper_force_thresholds) {
-  static_cast<franka::Robot::Impl*>(franka_control.get())->executeCommand<research_interface::robot::SetCollisionBehavior>(
-      lower_torque_thresholds, upper_torque_thresholds, lower_torque_thresholds,
-      upper_torque_thresholds, lower_force_thresholds, upper_force_thresholds,
-      lower_force_thresholds, upper_force_thresholds);
+                                          const std::array<double, 7>& upper_torque_thresholds,
+                                          const std::array<double, 6>& lower_force_thresholds,
+                                          const std::array<double, 6>& upper_force_thresholds) {
+    static_cast<franka::Robot::Impl*>(franka_control.get())->executeCommand<research_interface::robot::SetCollisionBehavior>(
+                lower_torque_thresholds, upper_torque_thresholds, lower_torque_thresholds,
+                upper_torque_thresholds, lower_force_thresholds, upper_force_thresholds,
+                lower_force_thresholds, upper_force_thresholds);
 }
 
 void KinematicChain::setImpedanceBehavior(const std::array<double, 7> &joint_imp, const std::array<double, 6> &cart_imp){
