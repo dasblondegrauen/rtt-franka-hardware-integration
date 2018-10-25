@@ -242,14 +242,14 @@ void KinematicChain::setImpedanceBehavior(const std::array<double, 7> &joint_imp
 }
 
 void KinematicChain::setFilters(double joint_position_filter_frequency,
-                       double joint_velocity_filter_frequency,
-                       double cartesian_position_filter_frequency,
-                       double cartesian_velocity_filter_frequency,
-                       double controller_filter_frequency) {
-  static_cast<franka::Robot::Impl*>(franka_control.get())->executeCommand<research_interface::robot::SetFilters>(
-      joint_position_filter_frequency, joint_velocity_filter_frequency,
-      cartesian_position_filter_frequency, cartesian_velocity_filter_frequency,
-      controller_filter_frequency);
+                                double joint_velocity_filter_frequency,
+                                double cartesian_position_filter_frequency,
+                                double cartesian_velocity_filter_frequency,
+                                double controller_filter_frequency) {
+    static_cast<franka::Robot::Impl*>(franka_control.get())->executeCommand<research_interface::robot::SetFilters>(
+                joint_position_filter_frequency, joint_velocity_filter_frequency,
+                cartesian_position_filter_frequency, cartesian_velocity_filter_frequency,
+                controller_filter_frequency);
 }
 
 std::string KinematicChain::printKinematicChainInformation() {
