@@ -204,7 +204,7 @@ throw;
 
 void KinematicChain::move() try {
     // if (current_control_mode == franka::ControlModes::Torque) {
-    if (jc->connected() && jc->read() != RTT::NoData) {
+    if (jc->connected() && jc->joint_cmd_fs != RTT::NoData) {
         if(current_control_mode == franka::ControlModes::Torque) {
             franka_state = franka_control->update(&motion_command, &control_command);
         } else {

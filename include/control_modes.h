@@ -15,6 +15,7 @@ namespace franka {
             virtual RTT::FlowStatus &read() = 0;
             virtual bool connected() = 0;
             virtual Eigen::VectorXf &value() = 0;
+            RTT::FlowStatus joint_cmd_fs;
     };
 
     template < class T > class JointController: public BaseJointController {
@@ -34,7 +35,7 @@ namespace franka {
             }
 
             RTT::InputPort < T > orocos_port;
-            RTT::FlowStatus joint_cmd_fs;
+            //RTT::FlowStatus joint_cmd_fs;
             T joint_cmd;
             std::function < Eigen::VectorXf & (T &) > conversion;
 
