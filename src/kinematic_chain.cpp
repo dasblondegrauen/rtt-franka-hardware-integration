@@ -1,5 +1,6 @@
 #include <kinematic_chain.h>
 #include <string>
+#include <franka/lowpass_filter.h>
 
 
 constexpr research_interface::robot::Move::Deviation KinematicChain::kDefaultDeviation;
@@ -66,12 +67,12 @@ bool KinematicChain::setControlMode(const std::string &controlMode) {
     // }
     RTT::log(RTT::Info) << "KC set control mode " << this->kinematic_chain_name << RTT::endlog();
 
-    motion_command = {};
     /*motion_command.q_c.fill(0);
     motion_command.dq_c.fill(0);
     motion_command.O_T_EE_c.fill(0);
     motion_command.O_dP_EE_c.fill(0);
     motion_command.elbow_c.fill(0);*/
+    motion_command = {};
 
     control_command.tau_J_d.fill(0);
     RTT::log(RTT::Info) << "fill 0 end " << franka::ControlModeMap.find(franka::ControlModes::Torque)->second << RTT::endlog();
@@ -177,12 +178,12 @@ bool KinematicChain::sense() {
 void KinematicChain::getCommand() {    
     if (jc->connected() && jc->read() != RTT::NoData) {
         //std::copy(jc->value().data(), jc->value().data() + 7, (*current_control_input_var).begin());
-        // RTT::log(RTT::Info) << "COMMAND  ";
+        RTT::log(RTT::Info) << "getCommand(): ";
         for (size_t i = 0; i < 7; i++) {
             (*current_control_input_var)[i] = static_cast<double>(jc->value()(i));
             RTT::log(RTT::Info) << current_control_input_var->at(i) << " ";
         }
-        //RTT::log(RTT::Info) << RTT::endlog();
+        RTT::log(RTT::Info) << RTT::endlog();
     } else {
         RTT::log(RTT::Debug) << "No data from control input " << franka::ControlModeMap.find(current_control_mode)->second << RTT::endlog();
     }
@@ -206,22 +207,27 @@ void KinematicChain::move() try {
     // if (current_control_mode == franka::ControlModes::Torque) {
     if (jc->connected() && jc->joint_cmd_fs != RTT::NoData) {
         if(current_control_mode == franka::ControlModes::Torque) {
+            RTT::log(RTT::Info) << "move(): Torque mode" << RTT::endlog();
             franka_state = franka_control->update(&motion_command, &control_command);
         } else {
+            RTT::log(RTT::Info) << "move(): Position/velocity mode" << RTT::endlog();
+            //for(size_t i = 0; i < 7; i++)
+                //motion_command.q_c[i] = franka::lowpassFilter(0.0005, motion_command.q_c[i], franka_state.q_d[i], franka::kDefaultCutoffFrequency);
             franka_state = franka_control->update(&motion_command, nullptr);
         }
     } else {
+        RTT::log(RTT::Info) << "move(): No command" << RTT::endlog();
         franka_state = franka_control->update(nullptr, nullptr);
     }
     // }
     franka_control->throwOnMotionError(franka_state, motion_id);
 } catch (const franka::NetworkException &exc) {
-    RTT::log(RTT::Error)<<"NETWORK: "<<exc.what()<<RTT::endlog();
+    RTT::log(RTT::Error) << "NETWORK: " << exc.what() << RTT::endlog();
     throw;
 } catch (const std::exception &exc) {
-    RTT::log(RTT::Error)<<exc.what()<<RTT::endlog();
-    RTT::log(RTT::Error) << "Measured/desired position: " << franka_state.q.at(0) << "/" << franka_state.q_d.at(0)
-                         << "\nMeasured/desired velocity: " << franka_state.dq.at(0) << "/" << franka_state.dq_d.at(0)
+    RTT::log(RTT::Error) << exc.what() << RTT::endlog();
+    RTT::log(RTT::Error) << "Measured/commanded/desired position: " << franka_state.q.at(0) << "/" << motion_command.q_c.at(0) << "/" << franka_state.q_d.at(0)
+                         << "\nMeasured/commanded/desired velocity: " << franka_state.dq.at(0) << "/" << motion_command.dq_c.at(0) << "/" << franka_state.dq_d.at(0)
                          << "\nDesired acceleration: " << franka_state.ddq_d.at(0) << RTT::endlog();
     //try {
     //    franka_control->cancelMotion(motion_id);
