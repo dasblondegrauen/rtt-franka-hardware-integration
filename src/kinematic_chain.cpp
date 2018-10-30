@@ -31,7 +31,7 @@ bool KinematicChain::initKinematicChain() {
                 1000, 1000,
                 1000);*/
     //TODO testing, values below should be set from srdf file
-    setImpedanceBehavior({{3000, 3000, 3000, 2500, 2500, 2000, 2000}}, {{3000, 3000, 3000, 300, 300, 300}});
+    setImpedanceBehavior({3000, 3000, 3000, 2500, 2500, 2000, 2000}, {3000, 3000, 3000, 300, 300, 300});
 
     return true;
 }
@@ -73,7 +73,7 @@ bool KinematicChain::setControlMode(const std::string &controlMode) {
     motion_command.O_dP_EE_c.fill(0);
     motion_command.elbow_c.fill(0);*/
     motion_command = {};
-    motion_command.dq_c = {{2.1750,	2.1750,	2.1750,	2.1750,	2.6100,	2.6100,	2.6100}};
+    //motion_command.dq_c = {{2.1750,	2.1750,	2.1750,	2.1750,	2.6100,	2.6100,	2.6100}};
 
     control_command.tau_J_d.fill(0);
     RTT::log(RTT::Info) << "fill 0 end " << franka::ControlModeMap.find(franka::ControlModes::Torque)->second << RTT::endlog();

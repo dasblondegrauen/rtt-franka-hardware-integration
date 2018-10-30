@@ -254,7 +254,12 @@ bool franka_robot::addChain(std::string name, std::string robot_ip,
     //                                                                  )
     //                                                              )
     //     );
-    kinematic_chains[name] = std::make_shared<KinematicChain>(chain_name, enabled_joints_in_chain, *(this->ports()), std::make_unique<franka::Robot::Impl>(std::make_unique<Network>(robot_ip, research_interface::robot::kCommandPort),50, RealtimeConfig::kEnforce));
+    kinematic_chains[name] = std::make_shared<KinematicChain>(chain_name,
+                                                              enabled_joints_in_chain,
+                                                              *(this->ports()),
+                                                              std::make_unique<franka::Robot::Impl>(std::make_unique<Network>(robot_ip, research_interface::robot::kCommandPort),
+                                                                                                    50,
+                                                                                                    RealtimeConfig::kEnforce));
     return true;
 }
 
