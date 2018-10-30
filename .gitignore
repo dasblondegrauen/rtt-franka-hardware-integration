@@ -36,3 +36,4 @@ build/
 .clang_complete
 orocos.log
 tags
+.tb_history
