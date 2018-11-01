@@ -138,7 +138,8 @@ bool franka_robot::getModel(const std::string &model_name) {
     #if URDF_MAJOR >= 1
     model = urdf::parseURDFFile(model_name);
     #else
-    model = std::shared_ptr<urdf::ModelInterface const>(urdf::parseURDFFile(model_name).get());
+    //model = std::shared_ptr<urdf::ModelInterface const>(urdf::parseURDFFile(model_name).get());
+    model = std::shared_ptr<urdf::ModelInterface const>(urdf::parseURDFFile(model_name).get(), [](auto p) {});
     #endif
     return bool(model);
 }
@@ -211,7 +212,8 @@ bool franka_robot::loadURDFAndSRDF(const std::string &URDF_path,
         #if URDF_MAJOR >= 1
         model = _xbotcore_model.get_urdf_model();
         #else
-	model = std::shared_ptr<urdf::ModelInterface const>(_xbotcore_model.get_urdf_model().get());
+        //model = std::shared_ptr<urdf::ModelInterface const>(_xbotcore_model.get_urdf_model().get());
+        model = std::shared_ptr<urdf::ModelInterface const>(_xbotcore_model.get_urdf_model().get(), [](auto p) {});
         #endif
     } else {
         RTT::log(RTT::Info) << "URDF and SRDF have been already loaded!" << RTT::endlog();
