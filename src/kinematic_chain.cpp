@@ -117,6 +117,9 @@ bool KinematicChain::startKinematicChain() {
     if (!franka_control) {
         return false;
     }
+
+    franka_state = franka_control->update(nullptr, nullptr);
+
     switch (current_control_mode) {
     case franka::ControlModes::Torque:
         RTT::log(RTT::Info) << "STARTED KINEMATIC CHAIN IN MODE: " << franka::ControlModeMap.find(franka::ControlModes::Torque)->second << RTT::endlog();
@@ -125,17 +128,17 @@ bool KinematicChain::startKinematicChain() {
     case franka::ControlModes::Velocity:
         RTT::log(RTT::Info) << "STARTED KINEMATIC CHAIN IN MODE: " << franka::ControlModeMap.find(franka::ControlModes::Velocity)->second << RTT::endlog();
         motion_id = franka_control->startMotion(research_interface::robot::Move::ControllerMode::kJointImpedance, franka::MotionGeneratorTraits<franka::JointVelocities>::kMotionGeneratorMode, kDefaultDeviation, kDefaultDeviation);
-        motion_command.dq_c = franka_state.dq;
+        motion_command.dq_c = franka_state.dq_d;
         break;
     case franka::ControlModes::Position:
         RTT::log(RTT::Info) << "STARTED KINEMATIC CHAIN IN MODE: " << franka::ControlModeMap.find(franka::ControlModes::Position)->second << RTT::endlog();
         motion_id = franka_control->startMotion(research_interface::robot::Move::ControllerMode::kJointImpedance, franka::MotionGeneratorTraits<franka::JointPositions>::kMotionGeneratorMode, kDefaultDeviation, kDefaultDeviation);
-        motion_command.q_c = franka_state.q;
+        motion_command.q_c = franka_state.q_d;
         break;
     default:
         return false;
     }
-    //franka_state = franka_control->update();
+
     return true;
 }
 
