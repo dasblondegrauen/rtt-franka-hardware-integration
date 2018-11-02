@@ -93,6 +93,9 @@ void Robot_data_test::updateHook() {
     // Ramp up values
     if(current_time < end_time) {
         *ramp_output = qp.getQ(current_time);
+        out_vel_port.write(out_vel_data);
+        out_pos_port.write(out_pos_data);
+
     } else {
         lock = false;
     }
@@ -102,8 +105,6 @@ void Robot_data_test::updateHook() {
 
     // Write values to output ports
     out_trq_port.write(out_trq_data);
-    out_vel_port.write(out_vel_data);
-    out_pos_port.write(out_pos_data);
 }
 
 void Robot_data_test::stopHook() {

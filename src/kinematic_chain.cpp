@@ -1,6 +1,7 @@
 #include <kinematic_chain.h>
 #include <string>
 #include <franka/lowpass_filter.h>
+#include <franka/rate_limiting.h>
 
 
 constexpr research_interface::robot::Move::Deviation KinematicChain::kDefaultDeviation;
@@ -217,6 +218,14 @@ void KinematicChain::move() try {
             //RTT::log(RTT::Info) << "move(): Position/velocity mode" << RTT::endlog();
             //for(size_t i = 0; i < 7; i++)
                 //motion_command.q_c[i] = franka::lowpassFilter(0.0005, motion_command.q_c[i], franka_state.q_d[i], franka::kDefaultCutoffFrequency);
+
+            std::array<double,7> tmp;
+            for (int i=0; i<7; ++i){
+                tmp[i]=franka::kMaxJointVelocity[i]*0.5;
+            }
+
+            motion_command.q_c = franka::limitRate(tmp, franka::kMaxJointAcceleration, franka::kMaxJointJerk, motion_command.q_c,
+                                     franka_state.q_d, franka_state.dq_d, franka_state.ddq_d);
             franka_state = franka_control->update(&motion_command, nullptr);
         }
     } else {
