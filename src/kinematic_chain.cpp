@@ -143,14 +143,14 @@ bool KinematicChain::startKinematicChain() {
 }
 
 bool KinematicChain::sense() {
-    // RTT::log(RTT::Info) << "UPDATE!!" << RTT::endlog();
+    // //RTT::log(RTT::Info) << "UPDATE!!" << RTT::endlog();
 
-    // RTT::log(RTT::Info) << "MAP!!" << RTT::endlog();
+    // //RTT::log(RTT::Info) << "MAP!!" << RTT::endlog();
     jf->joint_feedback.angles = Eigen::Map<Eigen::VectorXd>(franka_state.q.data(), dof).cast<float>();
     jf->joint_feedback.velocities = Eigen::Map<Eigen::VectorXd>(franka_state.dq.data(), dof).cast<float>();
     jf->joint_feedback.torques = Eigen::Map<Eigen::VectorXd>(franka_state.tau_J.data(), dof).cast<float>();
 
-    // RTT::log(RTT::Info) << "MAP FINISH!!" << RTT::endlog();
+    // //RTT::log(RTT::Info) << "MAP FINISH!!" << RTT::endlog();
     if (inertia_feedback->connected())
         inertia_feedback->dynamicFeedback = Eigen::Map<Eigen::MatrixXd>(franka_model->mass(franka_state).data(), dof, dof).cast<float>();
 
@@ -163,7 +163,7 @@ bool KinematicChain::sense() {
     if (jacobian_feedback->connected())
         jacobian_feedback->dynamicFeedback = Eigen::Map<Eigen::MatrixXd>(franka_model->zeroJacobian(franka::Frame::kFlange,franka_state).data(), 6, dof).cast<float>();
 
-    //RTT::log(RTT::Info) << "WRITE! Control command success rate: " << franka_state.control_command_success_rate << RTT::endlog();
+    ////RTT::log(RTT::Info) << "WRITE! Control command success rate: " << franka_state.control_command_success_rate << RTT::endlog();
     jf->write();
     if(franka_state.control_command_success_rate>0.8){
         if (inertia_feedback->connected())
@@ -182,14 +182,14 @@ bool KinematicChain::sense() {
 void KinematicChain::getCommand() {    
     if (jc->connected() && jc->read() != RTT::NoData) {
         //std::copy(jc->value().data(), jc->value().data() + 7, (*current_control_input_var).begin());
-        RTT::log(RTT::Info) << "getCommand(): ";
+        //RTT::log(RTT::Info) << "getCommand(): ";
         for (size_t i = 0; i < 7; i++) {
             (*current_control_input_var)[i] = static_cast<double>(jc->value()(i));
-            RTT::log(RTT::Info) << current_control_input_var->at(i) << " ";
+            //RTT::log(RTT::Info) << current_control_input_var->at(i) << " ";
         }
-        RTT::log(RTT::Info) << RTT::endlog();
+        //RTT::log(RTT::Info) << RTT::endlog();
     } else {
-        RTT::log(RTT::Debug) << "No data from control input " << franka::ControlModeMap.find(current_control_mode)->second << RTT::endlog();
+        //RTT::log(RTT::Debug) << "No data from control input " << franka::ControlModeMap.find(current_control_mode)->second << RTT::endlog();
     }
 }
 
@@ -211,20 +211,22 @@ void KinematicChain::move() try {
     // if (current_control_mode == franka::ControlModes::Torque) {
     if (jc->connected() && jc->joint_cmd_fs != RTT::NoData) {
         if(current_control_mode == franka::ControlModes::Torque) {
-            RTT::log(RTT::Info) << "move(): Torque mode" << RTT::endlog();
+            //RTT::log(RTT::Info) << "move(): Torque mode" << RTT::endlog();
             franka_state = franka_control->update(&motion_command, &control_command);
         } else {
-            RTT::log(RTT::Info) << "move(): Position/velocity mode" << RTT::endlog();
+            //RTT::log(RTT::Info) << "move(): Position/velocity mode" << RTT::endlog();
             //for(size_t i = 0; i < 7; i++)
                 //motion_command.q_c[i] = franka::lowpassFilter(0.0005, motion_command.q_c[i], franka_state.q_d[i], franka::kDefaultCutoffFrequency);
             franka_state = franka_control->update(&motion_command, nullptr);
         }
     } else {
-        RTT::log(RTT::Info) << "move(): No command" << RTT::endlog();
+        //RTT::log(RTT::Info) << "move(): No command" << RTT::endlog();
         franka_state = franka_control->update(nullptr, nullptr);
     }
-    // }    
+    // }
+    //RTT::log(RTT::Info) << "Update complete... " << RTT::endlog();
     franka_control->throwOnMotionError(franka_state, motion_id);
+    //RTT::log(RTT::Info) << "No error!" << RTT::endlog();
 } catch (const franka::NetworkException &exc) {
     RTT::log(RTT::Error) << "NETWORK: " << exc.what() << RTT::endlog();
     throw;

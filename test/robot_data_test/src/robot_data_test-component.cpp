@@ -98,7 +98,7 @@ void Robot_data_test::updateHook() {
     }
 
     // Do something with *ramp_output, so it does not get optimized out ¯\_(ツ)_/¯
-    RTT::log(RTT::Info) << "Values: " << *ramp_output << RTT::endlog();
+    RTT::log(RTT::Info) << "Values: " << ramp_output->transpose() << RTT::endlog();
 
     // Write values to output ports
     out_trq_port.write(out_trq_data);
