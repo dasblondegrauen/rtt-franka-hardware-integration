@@ -219,12 +219,11 @@ void KinematicChain::move() try {
             //for(size_t i = 0; i < 7; i++)
                 //motion_command.q_c[i] = franka::lowpassFilter(0.0005, motion_command.q_c[i], franka_state.q_d[i], franka::kDefaultCutoffFrequency);
 
-            std::array<double,7> tmp;
-            for (int i=0; i<7; ++i){
-                tmp[i]=franka::kMaxJointVelocity[i]*0.5;
-            }
+            auto mul = [&](const std::array<double, 7>& in, std::array<double, 7> &out, const double factor) -> void {
+                std::transform(in.begin(), in.end(), out.begin(), [factor](auto value) -> double { return value * factor; });
+            };
 
-            motion_command.q_c = franka::limitRate(tmp, franka::kMaxJointAcceleration, franka::kMaxJointJerk, motion_command.q_c,
+            motion_command.q_c = franka::limitRate(franka::kMaxJointVelocity, franka::kMaxJointAcceleration, franka::kMaxJointJerk, motion_command.q_c,
                                      franka_state.q_d, franka_state.dq_d, franka_state.ddq_d);
             franka_state = franka_control->update(&motion_command, nullptr);
         }
