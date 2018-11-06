@@ -164,7 +164,7 @@ bool KinematicChain::sense() {
     if (jacobian_feedback->connected())
         jacobian_feedback->dynamicFeedback = Eigen::Map<Eigen::MatrixXd>(franka_model->zeroJacobian(franka::Frame::kFlange,franka_state).data(), 6, dof).cast<float>();
 
-    ////RTT::log(RTT::Info) << "WRITE! Control command success rate: " << franka_state.control_command_success_rate << RTT::endlog();
+    //RTT::log(RTT::Info) << "WRITE! Control command success rate: " << franka_state.control_command_success_rate << RTT::endlog();
     jf->write();
     if(franka_state.control_command_success_rate>0.8){
         if (inertia_feedback->connected())
@@ -212,18 +212,16 @@ void KinematicChain::move() try {
     // if (current_control_mode == franka::ControlModes::Torque) {
     if (jc->connected() && jc->joint_cmd_fs != RTT::NoData) {
         if(current_control_mode == franka::ControlModes::Torque) {
-            //RTT::log(RTT::Info) << "move(): Torque mode" << RTT::endlog();
             franka_state = franka_control->update(&motion_command, &control_command);
         } else {
-            //RTT::log(RTT::Info) << "move(): Position/velocity mode" << RTT::endlog();
-            //for(size_t i = 0; i < 7; i++)
-                //motion_command.q_c[i] = franka::lowpassFilter(0.0005, motion_command.q_c[i], franka_state.q_d[i], franka::kDefaultCutoffFrequency);
+            //motion_command.q_c = franka::limitRate(franka::kMaxJointVelocity, franka::kMaxJointAcceleration, franka::kMaxJointJerk, motion_command.q_c,
+                                                   //franka_state.q_d, franka_state.dq_d, franka_state.ddq_d);
 
-            std::array<double, 7> max_vel, max_acc, max_jerk;
-            std::transform(franka::kMaxJointVelocity.begin(), franka::kMaxJointVelocity.end(), max_vel.begin(), [](double a) -> double { return 0.5 * a; });
+            RTT::log(RTT::Info) << "q_c: ";
+            for(size_t i = 0; i < 7; i++)
+                RTT::log(RTT::Info) << motion_command.q_c.at(i) << " ";
+            RTT::log(RTT::Info) << RTT::endlog();
 
-            motion_command.q_c = franka::limitRate(franka::kMaxJointVelocity, franka::kMaxJointAcceleration, franka::kMaxJointJerk, motion_command.q_c,
-                                     franka_state.q_d, franka_state.dq_d, franka_state.ddq_d);
             franka_state = franka_control->update(&motion_command, nullptr);
         }
     } else {
@@ -239,9 +237,6 @@ void KinematicChain::move() try {
     throw;
 } catch (const std::exception &exc) {
     RTT::log(RTT::Error) << exc.what() << RTT::endlog();
-    RTT::log(RTT::Error) << "Measured/commanded/desired position: " << franka_state.q.at(0) << "/" << motion_command.q_c.at(0) << "/" << franka_state.q_d.at(0)
-                         << "\nMeasured/commanded/desired velocity: " << franka_state.dq.at(0) << "/" << motion_command.dq_c.at(0) << "/" << franka_state.dq_d.at(0)
-                         << "\nDesired acceleration: " << franka_state.ddq_d.at(0) << RTT::endlog();
     //try {
     //    franka_control->cancelMotion(motion_id);
     //} catch (...) {}
