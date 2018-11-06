@@ -9,6 +9,8 @@
 #include <rst-rt/kinematics/JointAngles.hpp>
 #include <Eigen/Core>
 #include "QuinticPolynomial.hpp"
+#include "cosine.hpp"
+
 
 class Robot_data_test : public RTT::TaskContext{
 public:
@@ -44,9 +46,11 @@ private:
     void setValue(int idx, float val);
 
     QuinticPolynomial<float> qp;
+    Cosine<float> cos;
     Eigen::VectorXf* ramp_input, *ramp_output;
-    double current_time = 0, end_time = 0;
-    bool lock;
+    double current_time = 0, end_time = 0, start_time = 0;
+    bool lock, gen_cosine;
     void ramp(int idx, float target, double time);
+    void cosine(int idx, double amplitude, double period);
 };
 #endif

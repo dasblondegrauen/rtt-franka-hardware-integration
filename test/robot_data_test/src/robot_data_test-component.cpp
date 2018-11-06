@@ -21,8 +21,10 @@ Robot_data_test::Robot_data_test(std::string const& name) : TaskContext(name) {
 
     addOperation("setValue", &Robot_data_test::setValue, this, RTT::ClientThread);
     addOperation("ramp", &Robot_data_test::ramp, this, RTT::ClientThread);
+    addOperation("cosine", &Robot_data_test::cosine, this, RTT::ClientThread);
 
     lock = false;
+    gen_cosine = false;
     ramp_input = &(joint_state_in_data.torques);
     ramp_output = &(out_trq_data.torques);
 }
@@ -95,9 +97,14 @@ void Robot_data_test::updateHook() {
         *ramp_output = qp.getQ(current_time);
         out_vel_port.write(out_vel_data);
         out_pos_port.write(out_pos_data);
-
+    } else if(gen_cosine) {
+        *ramp_output = cos.getQ(current_time - start_time);
+        RTT::log(RTT::Info) << "Generating cosine: " << out_pos_data.angles.transpose() << RTT::endlog();
+        out_vel_port.write(out_vel_data);
+        out_pos_port.write(out_pos_data);
     } else {
         lock = false;
+        gen_cosine = false;
     }
 
     // Do something with *ramp_output, so it does not get optimized out ¯\_(ツ)_/¯
@@ -136,6 +143,19 @@ void Robot_data_test::ramp(int idx, float target, double time) {
 
     lock = true;
 }
+
+
+void Robot_data_test::cosine(int idx, double amplitude, double period) {
+    start_time = current_time;
+
+    Eigen::VectorXf amplitudes = Eigen::VectorXf::Zero(7);
+    amplitudes(idx) = amplitude;
+
+    cos = Cosine<float>(Eigen::VectorXf(*ramp_input), amplitudes, period);
+
+    gen_cosine = true;
+}
+
 /*
  * Using this macro, only one component may live
  * in one library *and* you may *not* link this library
