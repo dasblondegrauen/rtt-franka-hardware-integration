@@ -84,18 +84,16 @@ void Robot_data_test::updateHook() {
     // Read state from input ports
     joint_state_in_flow = joint_state_in_port.read(joint_state_in_data);
 
-    // Feed back joint positions & velocities
-
     // Modify values
     if(joint_state_in_flow != RTT::NoData) {
         if(current_time < end_time) {
             *ramp_output = qp.getQ(current_time);
+            //out_vel_data.velocities = qp.getQd(current_time); // For testing purposes
             out_trq_port.write(out_trq_data);
             out_vel_port.write(out_vel_data);
             out_pos_port.write(out_pos_data);
         } else if(gen_cosine) {
             *ramp_output = cos.getQ(current_time - start_time);
-            RTT::log(RTT::Info) << "Generating cosine: " << out_pos_data.angles.transpose() << RTT::endlog();
             out_trq_port.write(out_trq_data);
             out_vel_port.write(out_vel_data);
             out_pos_port.write(out_pos_data);
@@ -105,7 +103,7 @@ void Robot_data_test::updateHook() {
         }
 
         // Do something with *ramp_output, so it does not get optimized out ¯\_(ツ)_/¯
-        RTT::log(RTT::Info) << "Values: " << ramp_output->transpose() << RTT::endlog();
+        //RTT::log(RTT::Info) << "Values: " << ramp_output->transpose() << RTT::endlog();
     }
 }
 
