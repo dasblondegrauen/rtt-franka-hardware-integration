@@ -83,35 +83,30 @@ void Robot_data_test::updateHook() {
 
     // Read state from input ports
     joint_state_in_flow = joint_state_in_port.read(joint_state_in_data);
-    //grav_in_flow = grav_in_port.read(grav_in_data);
-    //coriolis_in_flow = coriolis_in_port.read(coriolis_in_data);
 
     // Feed back joint positions & velocities
+
+    // Modify values
     if(joint_state_in_flow != RTT::NoData) {
-        out_pos_data.angles = joint_state_in_data.angles;
-        out_vel_data.velocities = joint_state_in_data.velocities;
+        if(current_time < end_time) {
+            *ramp_output = qp.getQ(current_time);
+            out_trq_port.write(out_trq_data);
+            out_vel_port.write(out_vel_data);
+            out_pos_port.write(out_pos_data);
+        } else if(gen_cosine) {
+            *ramp_output = cos.getQ(current_time - start_time);
+            RTT::log(RTT::Info) << "Generating cosine: " << out_pos_data.angles.transpose() << RTT::endlog();
+            out_trq_port.write(out_trq_data);
+            out_vel_port.write(out_vel_data);
+            out_pos_port.write(out_pos_data);
+        } else {
+            lock = false;
+            gen_cosine = false;
+        }
+
+        // Do something with *ramp_output, so it does not get optimized out ¯\_(ツ)_/¯
+        RTT::log(RTT::Info) << "Values: " << ramp_output->transpose() << RTT::endlog();
     }
-
-    // Ramp up values
-    if(current_time < end_time) {
-        *ramp_output = qp.getQ(current_time);
-        out_vel_port.write(out_vel_data);
-        out_pos_port.write(out_pos_data);
-    } else if(gen_cosine) {
-        *ramp_output = cos.getQ(current_time - start_time);
-        RTT::log(RTT::Info) << "Generating cosine: " << out_pos_data.angles.transpose() << RTT::endlog();
-        out_vel_port.write(out_vel_data);
-        out_pos_port.write(out_pos_data);
-    } else {
-        lock = false;
-        gen_cosine = false;
-    }
-
-    // Do something with *ramp_output, so it does not get optimized out ¯\_(ツ)_/¯
-    RTT::log(RTT::Info) << "Values: " << ramp_output->transpose() << RTT::endlog();
-
-    // Write values to output ports
-    out_trq_port.write(out_trq_data);
 }
 
 void Robot_data_test::stopHook() {

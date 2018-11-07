@@ -217,10 +217,10 @@ void KinematicChain::move() try {
             //motion_command.q_c = franka::limitRate(franka::kMaxJointVelocity, franka::kMaxJointAcceleration, franka::kMaxJointJerk, motion_command.q_c,
                                                    //franka_state.q_d, franka_state.dq_d, franka_state.ddq_d);
 
-            RTT::log(RTT::Info) << "q_c: ";
+            /*RTT::log(RTT::Info) << "q_c: ";
             for(size_t i = 0; i < 7; i++)
                 RTT::log(RTT::Info) << motion_command.q_c.at(i) << " ";
-            RTT::log(RTT::Info) << RTT::endlog();
+            RTT::log(RTT::Info) << RTT::endlog();*/
 
             franka_state = franka_control->update(&motion_command, nullptr);
         }
