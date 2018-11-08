@@ -25,8 +25,10 @@ bool KinematicChain::initKinematicChain() {
     RTT::log(RTT::Info) << kinematic_chain_name << RTT::endlog();
     setFeedBack();
     setCollisionBehavior(
-    {{1000.0, 1000.0, 1000.0, 1000.0, 1000.0, 1000.0, 1000.0}}, {{1000.0, 1000.0, 1000.0, 1000.0, 1000.0, 1000.0, 1000.0}},
-    {{1000.0, 1000.0, 1000.0, 1000.0, 1000.0, 1000.0}}, {{1000.0, 1000.0, 1000.0, 1000.0, 1000.0, 1000.0}});
+    //{{1000.0, 1000.0, 1000.0, 1000.0, 1000.0, 1000.0, 1000.0}}, {{1000.0, 1000.0, 1000.0, 1000.0, 1000.0, 1000.0, 1000.0}},
+    //{{1000.0, 1000.0, 1000.0, 1000.0, 1000.0, 1000.0}}, {{1000.0, 1000.0, 1000.0, 1000.0, 1000.0, 1000.0}});
+    {{20.0, 20.0, 18.0, 18.0, 16.0, 14.0, 12.0}}, {{20.0, 20.0, 18.0, 18.0, 16.0, 14.0, 12.0}},
+    {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}}, {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}});
     /*setFilters(
                 1000, 1000,
                 1000, 1000,
@@ -119,7 +121,8 @@ bool KinematicChain::startKinematicChain() {
         return false;
     }
 
-    franka_state = franka_control->update(nullptr, nullptr);
+    //franka_state = franka_control->update(nullptr, nullptr);
+    franka_state = static_cast<franka::Robot::Impl*>(franka_control.get())->readOnce();
 
     switch (current_control_mode) {
     case franka::ControlModes::Torque:
