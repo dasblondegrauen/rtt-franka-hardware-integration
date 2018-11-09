@@ -88,12 +88,6 @@ class KinematicChain {
 
     void setImpedanceBehavior(const std::array<double,7> & joint_imp,const std::array<double,6> & cart_imp);
 
- void setFilters(double joint_position_filter_frequency,
-                       double joint_velocity_filter_frequency,
-                       double cartesian_position_filter_frequency,
-                       double cartesian_velocity_filter_frequency,
-                       double controller_filter_frequency);
-
     private:
         std::string kinematic_chain_name;
         int dof;

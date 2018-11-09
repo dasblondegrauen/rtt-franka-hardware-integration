@@ -29,10 +29,6 @@ bool KinematicChain::initKinematicChain() {
     //{{1000.0, 1000.0, 1000.0, 1000.0, 1000.0, 1000.0}}, {{1000.0, 1000.0, 1000.0, 1000.0, 1000.0, 1000.0}});
     {{20.0, 20.0, 18.0, 18.0, 16.0, 14.0, 12.0}}, {{20.0, 20.0, 18.0, 18.0, 16.0, 14.0, 12.0}},
     {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}}, {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}});
-    /*setFilters(
-                1000, 1000,
-                1000, 1000,
-                1000);*/
     //TODO testing, values below should be set from srdf file
     setImpedanceBehavior({3000, 3000, 3000, 2500, 2500, 2000, 2000}, {3000, 3000, 3000, 300, 300, 300});
 
@@ -70,15 +66,10 @@ bool KinematicChain::setControlMode(const std::string &controlMode) {
     // }
     RTT::log(RTT::Info) << "KC set control mode " << this->kinematic_chain_name << RTT::endlog();
 
-    /*motion_command.q_c.fill(0);
-    motion_command.dq_c.fill(0);
-    motion_command.O_T_EE_c.fill(0);
-    motion_command.O_dP_EE_c.fill(0);
-    motion_command.elbow_c.fill(0);*/
     motion_command = {};
-    //motion_command.dq_c = {{2.1750,	2.1750,	2.1750,	2.1750,	2.6100,	2.6100,	2.6100}};
+    control_command = {};
+    //control_command.tau_J_d.fill(0);
 
-    control_command.tau_J_d.fill(0);
     RTT::log(RTT::Info) << "fill 0 end " << franka::ControlModeMap.find(franka::ControlModes::Torque)->second << RTT::endlog();
 
     if (controlMode == franka::ControlModeMap.find(franka::ControlModes::Torque)->second) {
@@ -259,17 +250,6 @@ void KinematicChain::setCollisionBehavior(const std::array<double, 7>& lower_tor
 void KinematicChain::setImpedanceBehavior(const std::array<double, 7> &joint_imp, const std::array<double, 6> &cart_imp){
     static_cast<franka::Robot::Impl*>(franka_control.get())->executeCommand<research_interface::robot::SetJointImpedance>(joint_imp);
     static_cast<franka::Robot::Impl*>(franka_control.get())->executeCommand<research_interface::robot::SetCartesianImpedance>(cart_imp);
-}
-
-void KinematicChain::setFilters(double joint_position_filter_frequency,
-                                double joint_velocity_filter_frequency,
-                                double cartesian_position_filter_frequency,
-                                double cartesian_velocity_filter_frequency,
-                                double controller_filter_frequency) {
-    static_cast<franka::Robot::Impl*>(franka_control.get())->executeCommand<research_interface::robot::SetFilters>(
-                joint_position_filter_frequency, joint_velocity_filter_frequency,
-                cartesian_position_filter_frequency, cartesian_velocity_filter_frequency,
-                controller_filter_frequency);
 }
 
 std::string KinematicChain::printKinematicChainInformation() {
