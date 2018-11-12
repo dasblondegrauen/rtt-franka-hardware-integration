@@ -9,7 +9,7 @@ var string path_model_urdf = os.getenv("GAZEBO_MODEL_PATH") + "/franka/model.urd
 var string path_model_srdf = os.getenv("GAZEBO_MODEL_PATH") + "/franka/model.srdf";
 
 loadComponent("Franka", "franka::franka_robot");
-setActivity("Franka", 0.0005, 90, ORO_SCHED_RT);
+setActivity("Franka", 0, 90, ORO_SCHED_RT);
 Franka.ip_addr = "172.16.0.2";
 Franka.addChain("Franka", "172.16.0.2", path_model_urdf, path_model_srdf);
 Franka.setControlMode("Franka", "JointTorqueCtrl");

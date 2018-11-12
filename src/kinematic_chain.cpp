@@ -138,14 +138,13 @@ bool KinematicChain::startKinematicChain() {
 }
 
 bool KinematicChain::sense() {
-    // //RTT::log(RTT::Info) << "UPDATE!!" << RTT::endlog();
+    auto time = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now().time_since_epoch());
+    RTT::log(RTT::Info) << "SENSE:\t" << time.count() % 360000000 << RTT::endlog();
 
-    // //RTT::log(RTT::Info) << "MAP!!" << RTT::endlog();
     jf->joint_feedback.angles = Eigen::Map<Eigen::VectorXd>(franka_state.q.data(), dof).cast<float>();
     jf->joint_feedback.velocities = Eigen::Map<Eigen::VectorXd>(franka_state.dq.data(), dof).cast<float>();
     jf->joint_feedback.torques = Eigen::Map<Eigen::VectorXd>(franka_state.tau_J.data(), dof).cast<float>();
 
-    // //RTT::log(RTT::Info) << "MAP FINISH!!" << RTT::endlog();
     if (inertia_feedback->connected())
         inertia_feedback->dynamicFeedback = Eigen::Map<Eigen::MatrixXd>(franka_model->mass(franka_state).data(), dof, dof).cast<float>();
 
@@ -176,6 +175,9 @@ bool KinematicChain::sense() {
 
 void KinematicChain::getCommand() {    
     if (jc->connected() && jc->read() != RTT::NoData) {
+        auto time = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now().time_since_epoch());
+        RTT::log(RTT::Info) << "GETCMD\t" << time.count() % 360000000 << RTT::endlog();
+
         //std::copy(jc->value().data(), jc->value().data() + 7, (*current_control_input_var).begin());
         //RTT::log(RTT::Info) << "getCommand(): ";
         for (size_t i = 0; i < 7; i++) {
@@ -205,11 +207,20 @@ throw;
 void KinematicChain::move() try {
     // if (current_control_mode == franka::ControlModes::Torque) {
     if (jc->connected() && jc->joint_cmd_fs != RTT::NoData) {
+        auto time = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now().time_since_epoch());
+        RTT::log(RTT::Info) << "MOVE:\t" << time.count() % 360000000 << RTT::endlog();
+
         if(current_control_mode == franka::ControlModes::Torque) {
             franka_state = franka_control->update(&motion_command, &control_command);
         } else {
-            //motion_command.q_c = franka::limitRate(franka::kMaxJointVelocity, franka::kMaxJointAcceleration, franka::kMaxJointJerk, motion_command.q_c,
-                                                   //franka_state.q_d, franka_state.dq_d, franka_state.ddq_d);
+            //for(size_t i = 0; i < 7; i++)
+            //    motion_command.q_c.at(i) = franka::lowpassFilter(franka::kDeltaT,
+            //                                                     motion_command.q_c.at(i),
+            //                                                     franka_state.q_d.at(i),
+            //                                                     franka::kDefaultCutoffFrequency);
+
+            //motion_command.q_c = franka::limitRate(franka::kMaxJointVelocity, franka::kMaxJointAcceleration, franka::kMaxJointJerk,
+            //                                       motion_command.q_c, franka_state.q_d, franka_state.dq_d, franka_state.ddq_d);
 
             /*RTT::log(RTT::Info) << "q_c: ";
             for(size_t i = 0; i < 7; i++)
@@ -223,9 +234,10 @@ void KinematicChain::move() try {
         franka_state = franka_control->update(nullptr, nullptr);
     }
     // }
-    //RTT::log(RTT::Info) << "Update complete... " << RTT::endlog();
+
+    auto time = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now().time_since_epoch());
+    RTT::log(RTT::Info) << "ERROR?\t" << time.count() % 360000000 << RTT::endlog();
     franka_control->throwOnMotionError(franka_state, motion_id);
-    //RTT::log(RTT::Info) << "No error!" << RTT::endlog();
 } catch (const franka::NetworkException &exc) {
     RTT::log(RTT::Error) << "NETWORK: " << exc.what() << RTT::endlog();
     throw;
