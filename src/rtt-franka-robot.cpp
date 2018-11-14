@@ -138,7 +138,6 @@ bool franka_robot::getModel(const std::string &model_name) {
     #if URDF_MAJOR >= 1
     model = urdf::parseURDFFile(model_name);
     #else
-    //model = std::shared_ptr<urdf::ModelInterface const>(urdf::parseURDFFile(model_name).get());
     model = std::shared_ptr<urdf::ModelInterface const>(urdf::parseURDFFile(model_name).get(), [](auto p) {/* Empty deleter to avoid double free */});
     #endif
     return bool(model);
@@ -168,7 +167,6 @@ bool franka_robot::configureHook() {
     RTT::log(RTT::Info) << "Model name " << model->getName() << RTT::endlog();
     RTT::log(RTT::Info) << "Model has " << urdf_joints_.size() << " joints"
                         << RTT::endlog();
-    //RTT::log(RTT::Info) << kinematic_chains["Franka"]->getKinematicChainName() << "Model has " << urdf_links_.size() << " links"<< RTT::endlog();
 
     for (const std::string &chain_name : chain_names) {
         if (!(kinematic_chains[chain_name]->initKinematicChain())) {
@@ -212,7 +210,6 @@ bool franka_robot::loadURDFAndSRDF(const std::string &URDF_path,
         #if URDF_MAJOR >= 1
         model = _xbotcore_model.get_urdf_model();
         #else
-        //model = std::shared_ptr<urdf::ModelInterface const>(_xbotcore_model.get_urdf_model().get());
         model = std::shared_ptr<urdf::ModelInterface const>(_xbotcore_model.get_urdf_model().get(), [](auto p) {/* Empty deleter to avoid double free*/});
         #endif
     } else {
@@ -226,23 +223,14 @@ bool franka_robot::loadURDFAndSRDF(const std::string &URDF_path,
 bool franka_robot::addChain(std::string name, std::string robot_ip,
                             const std::string &URDF_path, const std::string &SRDF_path) {
     RTT::log(RTT::Info) << "ADDING CHAIN!!!!" << RTT::endlog();
+
     // load model and joints from the URDF and SRDF.
     loadURDFAndSRDF(URDF_path, SRDF_path);
+
     // get the names of the parsed chains from SRDF.
     std::string chain_name = _xbotcore_model.get_chain_names()[0];
-    // for (size_t i = 0; i < _xbotcore_model.get_chain_names().size(); i++) {
-    //     if (_xbotcore_model.get_chain_names()[i] == name) {
-    //         chain_name = name;
-    //         break;
-    //     }
-    // }
-    // std::cout << "HERE!!!!\n";
-    // if (chain_name == "") {
-    //     RTT::log(RTT::Error) << "CHAIN WAS NOT FOUND!!!" << RTT::endlog();
-    //     return false;
-    // }
-
     RTT::log(RTT::Info) << chain_name << " :chain" << RTT::endlog();
+
     // get the enabled joints. ################################################################## TODO DUPLICATE!!!
     std::vector<std::string> enabled_joints_in_chain;
     _xbotcore_model.get_enabled_joints_in_chain(chain_name,
@@ -250,21 +238,10 @@ bool franka_robot::addChain(std::string name, std::string robot_ip,
     RTT::log(RTT::Info) << "NUMBER OF ENABLED JOINTS" << enabled_joints_in_chain.size() << RTT::endlog();
     RTT::log(RTT::Info) << name << ": NAME!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << RTT::endlog();
     chain_names.push_back(name);
-    // get the enabled joints. ################################################################## TODO DUPLICATE!!!
-    // kinematic_chains.insert(
-    //     std::pair<std::string, std::shared_ptr<KinematicChain> >(name,
-    //                                                              std::make_shared<KinematicChain>(
-    //                                                                  /** choose a name. */
-    //                                                                  chain_name,
-    //                                                                  /** add the enabled joints to control. */
-    //                                                                  enabled_joints_in_chain,
-    //                                                                  /** pass the pointer to the ports to enable the kinematic chain object to add ports. */
-    //                                                                  *(this->ports()),
-    //                                                                  std::make_unique<franka::Robot::Impl>(std::make_unique<Network>(robot_ip, research_interface::robot::kCommandPort), RealtimeConfig::kEnforce)
-    //                                                                  )
-    //                                                              )
-    //     );
-    kinematic_chains[name] = std::make_shared<KinematicChain>(chain_name, enabled_joints_in_chain, *(this->ports()), std::make_unique<franka::Robot::Impl>(std::make_unique<Network>(robot_ip, research_interface::robot::kCommandPort),1, RealtimeConfig::kEnforce));
+    kinematic_chains[name] = std::make_shared<KinematicChain>(chain_name,
+                                                              enabled_joints_in_chain,
+                                                              *(this->ports()),
+                                                              std::make_unique<franka::Robot::Impl>(std::make_unique<Network>(robot_ip, research_interface::robot::kCommandPort), 1, RealtimeConfig::kEnforce));
     return true;
 }
 
