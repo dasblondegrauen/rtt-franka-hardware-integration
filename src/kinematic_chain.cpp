@@ -93,6 +93,11 @@ bool KinematicChain::setControlMode(const std::string &controlMode) {
                                                                                        [](rstrt::kinematics::JointAngles &input) -> Eigen::VectorXf& {return input.angles;});
         RTT::log(RTT::Info) << "Set control mode to position" << RTT::endlog();
         current_control_input_var = &(motion_command.q_c);
+    } else if(controlMode == franka::ControlModeMap.find(franka::ControlModes::Impedance)->second) {
+        RTT::log(RTT::Info) << "Found mapping string" << RTT::endlog();
+        // TODO Implement!
+        RTT::log(RTT::Info) << "Joint impedance control not implemented yet!" << RTT::endlog();
+        return false;
     } else {
         RTT::log(RTT::Error) << "Control Mode has not been implemented " << controlMode << RTT::endlog();
         return false;
@@ -111,7 +116,10 @@ bool KinematicChain::startKinematicChain() {
     switch (current_control_mode) {
     case franka::ControlModes::Torque:
         RTT::log(RTT::Info) << "STARTED KINEMATIC CHAIN IN MODE: " << franka::ControlModeMap.find(franka::ControlModes::Torque)->second << RTT::endlog();
-        motion_id = franka_control->startMotion(research_interface::robot::Move::ControllerMode::kExternalController, franka::MotionGeneratorTraits<franka::JointVelocities>::kMotionGeneratorMode, kDefaultDeviation, kDefaultDeviation);
+        motion_id = franka_control->startMotion(research_interface::robot::Move::ControllerMode::kExternalController,
+                                                franka::MotionGeneratorTraits<franka::JointVelocities>::kMotionGeneratorMode,
+                                                kDefaultDeviation,
+                                                kDefaultDeviation);
         break;
     case franka::ControlModes::Velocity:
         RTT::log(RTT::Info) << "STARTED KINEMATIC CHAIN IN MODE: " << franka::ControlModeMap.find(franka::ControlModes::Velocity)->second << RTT::endlog();

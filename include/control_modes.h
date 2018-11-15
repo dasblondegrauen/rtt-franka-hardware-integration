@@ -5,9 +5,12 @@
 #include <rtt/Port.hpp>
 
 namespace franka {
-    enum ControlModes {Position, Velocity, Torque};
+    enum ControlModes {Position, Velocity, Torque, Impedance};
     static const std::map < ControlModes, std::string > ControlModeMap = {
-        {Position, "JointPositionCtrl"}, {Velocity, "JointVelocityCtrl"}, {Torque, "JointTorqueCtrl"}
+        {Position, "JointPositionCtrl"},
+        {Velocity, "JointVelocityCtrl"},
+        {Torque, "JointTorqueCtrl"},
+        {Impedance, "JointImpedanceCtrl"}
     };
 
     class BaseJointController {
