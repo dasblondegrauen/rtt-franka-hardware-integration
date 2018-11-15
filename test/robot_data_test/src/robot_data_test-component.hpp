@@ -43,14 +43,20 @@ private:
     RTT::OutputPort<rstrt::kinematics::JointAngles> out_pos_port;
     rstrt::kinematics::JointAngles out_pos_data;
 
-    void setValue(int idx, float val);
-
     QuinticPolynomial<float> qp;
     Cosine<float> cos;
     Eigen::VectorXf* ramp_input, *ramp_output;
     double current_time = 0, end_time = 0, start_time = 0;
-    bool lock, gen_cosine;
+    bool value_set, lock, gen_cosine;
+    void setValue(int idx, float val);
     void ramp(int idx, float target, double time);
     void cosine(int idx, double amplitude, double period);
+    void print();
+
+    inline void write() {
+        out_trq_port.write(out_trq_data);
+        out_vel_port.write(out_vel_data);
+        out_pos_port.write(out_pos_data);
+    };
 };
 #endif

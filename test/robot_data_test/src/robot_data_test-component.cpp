@@ -17,14 +17,15 @@ Robot_data_test::Robot_data_test(std::string const& name) : TaskContext(name) {
     coriolis_in_data.setZero(7);
     this->addPort("coriolis_in_port", coriolis_in_port);
 
-
-
     addOperation("setValue", &Robot_data_test::setValue, this, RTT::ClientThread);
     addOperation("ramp", &Robot_data_test::ramp, this, RTT::ClientThread);
     addOperation("cosine", &Robot_data_test::cosine, this, RTT::ClientThread);
+    addOperation("print", &Robot_data_test::print, this, RTT::ClientThread);
 
     lock = false;
     gen_cosine = false;
+    value_set = false;
+
     ramp_input = &(joint_state_in_data.torques);
     ramp_output = &(out_trq_data.torques);
 }
@@ -35,7 +36,7 @@ bool Robot_data_test::configureHook() {
     out_pos_data.angles.setZero(7);
 
     joint_state_in_flow = joint_state_in_port.read(joint_state_in_data);
-    if(joint_state_in_flow != RTT::NoData) {
+    if(joint_state_in_flow == RTT::NewData) {
         out_pos_data.angles = joint_state_in_data.angles;
         out_vel_data.velocities = joint_state_in_data.velocities;
 
@@ -85,18 +86,16 @@ void Robot_data_test::updateHook() {
     joint_state_in_flow = joint_state_in_port.read(joint_state_in_data);
 
     // Modify values
-    if(joint_state_in_flow != RTT::NoData) {
-        if(current_time < end_time) {
+    if(joint_state_in_flow == RTT::NewData) {
+        if(value_set) {
+            write();
+            value_set = false;
+        } else if(current_time < end_time) {
             *ramp_output = qp.getQ(current_time);
-            //out_vel_data.velocities = qp.getQd(current_time); // For testing purposes
-            out_trq_port.write(out_trq_data);
-            out_vel_port.write(out_vel_data);
-            out_pos_port.write(out_pos_data);
+            write();
         } else if(gen_cosine) {
             *ramp_output = cos.getQ(current_time - start_time);
-            out_trq_port.write(out_trq_data);
-            out_vel_port.write(out_vel_data);
-            out_pos_port.write(out_pos_data);
+            write();
         } else {
             lock = false;
             gen_cosine = false;
@@ -118,7 +117,9 @@ void Robot_data_test::cleanupHook() {
 }
 
 void Robot_data_test::setValue(int idx, float val) {
+    *ramp_output = Eigen::VectorXf(*ramp_input);
     (*ramp_output)(idx) = val;
+    value_set = true;
 }
 
 void Robot_data_test::ramp(int idx, float target, double time) {
@@ -145,8 +146,12 @@ void Robot_data_test::cosine(int idx, double amplitude, double period) {
     amplitudes(idx) = amplitude;
 
     cos = Cosine<float>(Eigen::VectorXf(*ramp_input), amplitudes, period);
-
     gen_cosine = true;
+}
+
+
+void Robot_data_test::print() {
+    std::cout << ramp_input->transpose() << std::endl;
 }
 
 /*

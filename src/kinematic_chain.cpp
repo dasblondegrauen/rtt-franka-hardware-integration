@@ -131,8 +131,8 @@ bool KinematicChain::startKinematicChain() {
 }
 
 bool KinematicChain::sense() {
-    auto time = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now().time_since_epoch());
-    RTT::log(RTT::Info) << "SENSE: " << time.count() % 60000000 << " ";
+    //auto time = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now().time_since_epoch());
+    //RTT::log(RTT::Info) << "SENSE: " << time.count() % 60000000 << " ";
 
     jf->joint_feedback.angles = Eigen::Map<Eigen::VectorXd>(franka_state.q.data(), dof).cast<float>();
     jf->joint_feedback.velocities = Eigen::Map<Eigen::VectorXd>(franka_state.dq.data(), dof).cast<float>();
@@ -168,8 +168,8 @@ bool KinematicChain::sense() {
 
 void KinematicChain::getCommand() {    
     if (jc->connected() && jc->read() != RTT::NoData) {
-        auto time = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now().time_since_epoch());
-        RTT::log(RTT::Info) << "GETCMD " << time.count() % 60000000 << " ";
+        //auto time = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now().time_since_epoch());
+        //RTT::log(RTT::Info) << "GETCMD " << time.count() % 60000000 << " ";
 
         for (size_t i = 0; i < 7; i++) {
             (*current_control_input_var)[i] = static_cast<double>(jc->value()(i));
@@ -196,8 +196,8 @@ void KinematicChain::stop() try {
 
 void KinematicChain::move() try {
     if (jc->connected() && jc->joint_cmd_fs != RTT::NoData) {
-        auto time = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now().time_since_epoch());
-        RTT::log(RTT::Info) << "MOVE: " << time.count() % 60000000 << " ";
+        //auto time = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now().time_since_epoch());
+        //RTT::log(RTT::Info) << "MOVE: " << time.count() % 60000000 << " ";
 
         if(current_control_mode == franka::ControlModes::Torque) {
             franka_state = franka_control->update(&motion_command, &control_command);
@@ -208,8 +208,8 @@ void KinematicChain::move() try {
         franka_state = franka_control->update(nullptr, nullptr);
     }
 
-    auto time = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now().time_since_epoch());
-    RTT::log(RTT::Info) << "ERROR? " << time.count() % 60000000 << RTT::endlog();
+    //auto time = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now().time_since_epoch());
+    //RTT::log(RTT::Info) << "ERROR? " << time.count() % 60000000 << RTT::endlog();
     franka_control->throwOnMotionError(franka_state, motion_id);
 } catch (const franka::NetworkException &exc) {
     RTT::log(RTT::Error) << "NETWORK: " << exc.what() << RTT::endlog();
