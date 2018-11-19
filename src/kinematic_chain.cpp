@@ -17,6 +17,8 @@ KinematicChain::KinematicChain(const std::string &chain_name,
 
     this->franka_control = std::move(franka_control);
     current_control_mode = franka::ControlModes::Torque;
+
+    //cmd_buffer.setZero(14);
 }
 
 bool KinematicChain::initKinematicChain() {
@@ -95,7 +97,12 @@ bool KinematicChain::setControlMode(const std::string &controlMode) {
         current_control_input_var = &(motion_command.q_c);
     } else if(controlMode == franka::ControlModeMap.find(franka::ControlModes::Impedance)->second) {
         RTT::log(RTT::Info) << "Found mapping string" << RTT::endlog();
-        // TODO Implement!
+        current_control_mode = franka::ControlModes::Impedance;
+        jc = std::make_unique<franka::JointController<rstrt::dynamics::JointImpedance>>(kinematic_chain_name,
+                                                                                        this->ports,
+                                                                                        franka::ControlModes::Impedance,
+                                                                                        [cmd_buffer = Eigen::VectorXf()](rstrt::dynamics::JointImpedance &input) mutable -> Eigen::VectorXf& { cmd_buffer = input.stiffness; cmd_buffer << input.damping; return cmd_buffer; });
+        // TODO current_control_input_var = ?
         RTT::log(RTT::Info) << "Joint impedance control not implemented yet!" << RTT::endlog();
         return false;
     } else {

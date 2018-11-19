@@ -112,6 +112,8 @@ class KinematicChain {
         std::unique_ptr < franka::DynamicFeedback < Eigen::MatrixXf >> jacobian_feedback;
         std::array < double, 7 > *current_control_input_var;
         uint32_t motion_id;
+
+        //Eigen::VectorXf cmd_buffer;
 };
 
 #endif
