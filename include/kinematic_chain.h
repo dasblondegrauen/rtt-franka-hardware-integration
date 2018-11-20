@@ -113,7 +113,8 @@ class KinematicChain {
         std::array < double, 7 > *current_control_input_var;
         uint32_t motion_id;
 
-        //Eigen::VectorXf cmd_buffer;
+        Eigen::VectorXf& convertImpedance(rstrt::dynamics::JointImpedance& input);
+        rstrt::dynamics::JointTorques impedance_command;
 };
 
 #endif
