@@ -194,7 +194,7 @@ bool KinematicChain::sense() {
 }
 
 void KinematicChain::getCommand() {    
-    if (jc->connected() && jc->read() != RTT::NoData) {
+    if (jc->connected() && jc->read() == RTT::NewData) {
         //auto time = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now().time_since_epoch());
         //RTT::log(RTT::Info) << "GETCMD " << time.count() % 60000000 << " ";
 
@@ -222,7 +222,7 @@ void KinematicChain::stop() try {
 }
 
 void KinematicChain::move() try {
-    if (jc->connected() && jc->joint_cmd_fs != RTT::NoData) {
+    if (jc->connected() && jc->joint_cmd_fs == RTT::NewData) {
         //auto time = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now().time_since_epoch());
         //RTT::log(RTT::Info) << "MOVE: " << time.count() % 60000000 << " ";
 
