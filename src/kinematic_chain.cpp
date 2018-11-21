@@ -209,7 +209,7 @@ void KinematicChain::getCommand() {
 }
 
 void KinematicChain::stop() try {
-    if(current_control_mode == franka::ControlModes::Torque) {
+    if(current_control_mode == franka::ControlModes::Torque || current_control_mode == franka::ControlModes::Impedance) {
         franka_control->finishMotion(motion_id, &motion_command, &control_command);
     } else {
         franka_control->finishMotion(motion_id, &motion_command, nullptr);
