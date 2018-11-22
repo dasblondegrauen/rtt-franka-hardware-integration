@@ -7,6 +7,7 @@
 #include <rst-rt/dynamics/JointTorques.hpp>
 #include <rst-rt/kinematics/JointVelocities.hpp>
 #include <rst-rt/kinematics/JointAngles.hpp>
+#include <rst-rt/dynamics/JointImpedance.hpp>
 #include <Eigen/Core>
 #include "QuinticPolynomial.hpp"
 #include "cosine.hpp"
@@ -43,14 +44,18 @@ private:
     RTT::OutputPort<rstrt::kinematics::JointAngles> out_pos_port;
     rstrt::kinematics::JointAngles out_pos_data;
 
+    RTT::OutputPort<rstrt::dynamics::JointImpedance> out_imp_port;
+    rstrt::dynamics::JointImpedance out_imp_data;
+
     QuinticPolynomial<float> qp;
     Cosine<float> cos;
     Eigen::VectorXf* ramp_input, *ramp_output;
     double current_time = 0, end_time = 0, start_time = 0;
-    bool value_set, lock, gen_cosine;
-    void setValue(int idx, float val);
+    bool single_value_set, lock, gen_cosine, impedance_set;
+    void setSingleValue(int idx, float val);
     void ramp(int idx, float target, double time);
     void cosine(int idx, double amplitude, double period);
+    void setImpedance(int idx, float stiffness, float damping);
     void print();
 
     inline void write() {
