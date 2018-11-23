@@ -74,8 +74,8 @@ bool KinematicChain::setControlMode(const std::string &controlMode) {
                                                                                        this->ports,
                                                                                        franka::ControlModes::Torque,
                                                                                        [](rstrt::dynamics::JointTorques &input) -> Eigen::VectorXf & {return input.torques;});
-        RTT::log(RTT::Info) << "Created relavant controller" << RTT::endlog();
         current_control_input_var = &(control_command.tau_J_d);
+        RTT::log(RTT::Info) << "Created relavant controller" << RTT::endlog();
     } else if(controlMode == franka::ControlModeMap.find(franka::ControlModes::Velocity)->second) {
         RTT::log(RTT::Info) << "Found mapping string" << RTT::endlog();
         current_control_mode = franka::ControlModes::Velocity;
@@ -83,8 +83,8 @@ bool KinematicChain::setControlMode(const std::string &controlMode) {
                                                                                            this->ports,
                                                                                            franka::ControlModes::Velocity,
                                                                                            [](rstrt::kinematics::JointVelocities &input) -> Eigen::VectorXf& {return input.velocities;});
-        RTT::log(RTT::Info) << "Set control mode to velocity" << RTT::endlog();
         current_control_input_var = &(motion_command.dq_c);
+        RTT::log(RTT::Info) << "Set control mode to velocity" << RTT::endlog();
     } else if(controlMode == franka::ControlModeMap.find(franka::ControlModes::Position)->second) {
         RTT::log(RTT::Info) << "Found mapping string" << RTT::endlog();
         current_control_mode = franka::ControlModes::Position;
@@ -92,8 +92,8 @@ bool KinematicChain::setControlMode(const std::string &controlMode) {
                                                                                        this->ports,
                                                                                        franka::ControlModes::Position,
                                                                                        [](rstrt::kinematics::JointAngles &input) -> Eigen::VectorXf& {return input.angles;});
-        RTT::log(RTT::Info) << "Set control mode to position" << RTT::endlog();
         current_control_input_var = &(motion_command.q_c);
+        RTT::log(RTT::Info) << "Set control mode to position" << RTT::endlog();
     } else if(controlMode == franka::ControlModeMap.find(franka::ControlModes::Impedance)->second) {
         RTT::log(RTT::Info) << "Found mapping string" << RTT::endlog();
         current_control_mode = franka::ControlModes::Impedance;
@@ -102,8 +102,7 @@ bool KinematicChain::setControlMode(const std::string &controlMode) {
                                                                                         franka::ControlModes::Impedance,
                                                                                         [this](rstrt::dynamics::JointImpedance &input) -> Eigen::VectorXf& {return this->convertImpedance(input); });
         current_control_input_var = &(control_command.tau_J_d);
-        RTT::log(RTT::Info) << "Joint impedance control not implemented yet!" << RTT::endlog();
-        return false;
+        RTT::log(RTT::Info) << "Set control mode to impedance" << RTT::endlog();
     } else {
         RTT::log(RTT::Error) << "Control Mode has not been implemented " << controlMode << RTT::endlog();
         return false;
