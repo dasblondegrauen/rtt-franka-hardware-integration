@@ -264,7 +264,8 @@ void KinematicChain::setImpedanceBehavior(const std::array<double, 7> &joint_imp
 }
 
 Eigen::VectorXf& KinematicChain::convertImpedance(rstrt::dynamics::JointImpedance& input) {
-    Eigen::VectorXf error = Eigen::Map<Eigen::VectorXd>(franka_state.q_d.data(), dof).cast<float>() - jf->joint_feedback.angles;
+    // TODO Use desired equilibrium instead of q_d
+    Eigen::VectorXf error = jf->joint_feedback.angles - Eigen::Map<Eigen::VectorXd>(franka_state.q_d.data(), dof).cast<float>();
     impedance_command.torques = -1.0 * input.stiffness.cwiseProduct(error.cast<float>())
             - input.damping.cwiseProduct(jf->joint_feedback.velocities)
             + Eigen::Map<Eigen::VectorXd>(franka_model->coriolis(franka_state).data(), dof).cast<float>();
