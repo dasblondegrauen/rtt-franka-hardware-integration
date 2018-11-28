@@ -37,3 +37,4 @@ build/
 orocos.log
 tags
 .tb_history
+compile_commands.json
