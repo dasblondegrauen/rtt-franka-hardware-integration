@@ -13,7 +13,7 @@
 #include "cosine.hpp"
 
 
-class Robot_data_test : public RTT::TaskContext{
+class Robot_data_test : public RTT::TaskContext {
 public:
     Robot_data_test(std::string const& name);
     bool configureHook();

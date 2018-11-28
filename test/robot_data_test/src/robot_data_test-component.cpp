@@ -37,7 +37,7 @@ bool Robot_data_test::configureHook() {
     out_vel_data.velocities.setZero(7);
     out_pos_data.angles.setZero(7);
     out_imp_data.stiffness.setZero(7);
-    out_imp_data.stiffness.setZero(7);
+    out_imp_data.damping.setZero(7);
 
     joint_state_in_flow = joint_state_in_port.read(joint_state_in_data);
     if(joint_state_in_flow == RTT::NewData) {
@@ -72,6 +72,8 @@ bool Robot_data_test::startHook() {
         RTT::log(RTT::Info) << "Starting test component in velocity mode" << RTT::endlog();
         ramp_input = &(joint_state_in_data.velocities);
         ramp_output = &(out_vel_data.velocities);
+    } else if(out_imp_port.connected()) {
+        RTT::log(RTT::Info) << "Starting test component in impedance mode" << RTT::endlog();
     } else {
         if(!out_trq_port.connected()) {
             RTT::log(RTT::Info) << "No output port connected, falling back to default" << RTT::endlog();
