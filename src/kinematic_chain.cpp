@@ -100,6 +100,11 @@ bool KinematicChain::setControlMode(const std::string &controlMode) {
                                                                                        this->ports,
                                                                                        franka::ControlModes::Impedance,
                                                                                        [this](rstrt::kinematics::JointAngles &input) -> Eigen::VectorXf& {return this->convertImpedance(input); });
+        impedance_flow = RTT::NoData;
+        impedance_input.stiffness.setZero(dof);
+        impedance_input.damping.setZero(dof);
+        ports.addPort(kinematic_chain_name + "_" + franka::ControlModeMap.find(franka::ControlModes::Impedance)->second, impedance_port)
+                .doc("Input for " + franka::ControlModeMap.find(franka::ControlModes::Impedance)->second + "-cmd from Orocos to Franka.");
         current_control_input_var = &(control_command.tau_J_d);
         RTT::log(RTT::Info) << "Set control mode to impedance" << RTT::endlog();
     } else {

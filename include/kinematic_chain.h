@@ -114,6 +114,8 @@ class KinematicChain {
         uint32_t motion_id;
 
         Eigen::VectorXf& convertImpedance(rstrt::kinematics::JointAngles& input);
+        RTT::InputPort<rstrt::dynamics::JointImpedance> impedance_port;
+        RTT::FlowStatus impedance_flow;
         rstrt::dynamics::JointImpedance impedance_input;
         rstrt::dynamics::JointTorques impedance_output;
 };
