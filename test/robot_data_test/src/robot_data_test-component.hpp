@@ -51,7 +51,8 @@ private:
     Cosine<float> cos;
     Eigen::VectorXf* ramp_input, *ramp_output;
     double current_time = 0, end_time = 0, start_time = 0;
-    bool single_value_set, lock, gen_cosine, impedance_set;
+    bool value_set, single_value_set, lock, gen_cosine, impedance_set;
+    void setValue(int idx, float val);
     void setSingleValue(int idx, float val);
     void ramp(int idx, float target, double time);
     void cosine(int idx, double amplitude, double period);

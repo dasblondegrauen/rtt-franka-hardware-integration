@@ -23,6 +23,7 @@ Robot_data_test::Robot_data_test(std::string const& name) : TaskContext(name) {
     addOperation("setImpedance", &Robot_data_test::setImpedance, this, RTT::ClientThread);
     addOperation("print", &Robot_data_test::print, this, RTT::ClientThread);
 
+    value_set = false;
     single_value_set = false;
     lock = false;
     gen_cosine = false;
@@ -74,6 +75,8 @@ bool Robot_data_test::startHook() {
         ramp_output = &(out_vel_data.velocities);
     } else if(out_imp_port.connected()) {
         RTT::log(RTT::Info) << "Starting test component in impedance mode" << RTT::endlog();
+        ramp_input = &(joint_state_in_data.angles);
+        ramp_output = &(out_pos_data.angles);
     } else {
         if(!out_trq_port.connected()) {
             RTT::log(RTT::Info) << "No output port connected, falling back to default" << RTT::endlog();
@@ -96,7 +99,9 @@ void Robot_data_test::updateHook() {
 
     // Modify values
     if(joint_state_in_flow == RTT::NewData) {
-        if(single_value_set) {
+        if(value_set) {
+            write();
+        } if(single_value_set) {
             write();
             single_value_set = false;
         } else if(current_time < end_time) {
@@ -127,6 +132,12 @@ void Robot_data_test::cleanupHook() {
     out_pos_data.angles.setZero();
     out_imp_data.stiffness.setZero();
     out_imp_data.damping.setZero();
+}
+
+void Robot_data_test::setValue(int idx, float val) {
+    *ramp_output = Eigen::VectorXf(*ramp_input);
+    (*ramp_output)(idx) = val;
+    value_set = true;
 }
 
 void Robot_data_test::setSingleValue(int idx, float val) {
