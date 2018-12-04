@@ -17,6 +17,7 @@ Robot_data_test::Robot_data_test(std::string const& name) : TaskContext(name) {
     coriolis_in_data.setZero(7);
     this->addPort("coriolis_in_port", coriolis_in_port);
 
+    addOperation("setValue", &Robot_data_test::setValue, this, RTT::ClientThread);
     addOperation("setSingleValue", &Robot_data_test::setSingleValue, this, RTT::ClientThread);
     addOperation("ramp", &Robot_data_test::ramp, this, RTT::ClientThread);
     addOperation("cosine", &Robot_data_test::cosine, this, RTT::ClientThread);
