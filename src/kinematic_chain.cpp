@@ -101,7 +101,6 @@ bool KinematicChain::setControlMode(const std::string &controlMode) {
                                                                                        franka::ControlModes::Impedance,
                                                                                        [this](rstrt::dynamics::JointImpedance &input) -> Eigen::VectorXf& {return this->convertImpedance(input); });
         impedance_q_flow = RTT::NoData;
-        impedance_q.angles.setZero(dof);
         ports.addPort(kinematic_chain_name + "_JointImpedanceQ", impedance_q_port)
                 .doc("Input for JointImpedanceQ-cmds from Orocos to Franka.");
         current_control_input_var = &(control_command.tau_J_d);
@@ -151,6 +150,10 @@ bool KinematicChain::startKinematicChain() {
                                                 franka::MotionGeneratorTraits<franka::JointVelocities>::kMotionGeneratorMode,
                                                 kDefaultDeviation,
                                                 kDefaultDeviation);
+        impedance_q.angles.setZero(7);
+        for(size_t i = 0; i < dof; i++) {
+            impedance_q.angles(i) = franka_state.q_d.at(i);
+        }
         break;
     default:
         return false;
@@ -207,6 +210,14 @@ void KinematicChain::getCommand() {
         //RTT::log(RTT::Info) << RTT::endlog();
     } else {
         //RTT::log(RTT::Debug) << "No data from control input " << franka::ControlModeMap.find(current_control_mode)->second << RTT::endlog();
+    }
+
+    if(current_control_mode == franka::ControlModes::Impedance) {
+        if(impedance_q_port.connected()) {
+            impedance_q_flow = impedance_q_port.read(impedance_q);
+        } else {
+            RTT::log(RTT::Warning) << "No joint angles for impedance control supplied. Please connect JointImpedanceQ!" << RTT::endlog();
+        }
     }
 }
 
