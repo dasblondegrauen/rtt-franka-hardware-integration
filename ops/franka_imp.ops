@@ -23,6 +23,6 @@ var ConnPolicy cp
 connect("test.joint_vals_in_port", "Franka.full_arm_JointFeedback", cp);
 
 test.configure();
-connect("test.joint_pos_out_port", "Franka.full_arm_JointPositionCtrl", cp);
+connect("test.joint_pos_out_port", "Franka.full_arm_JointImpedanceQ", cp);
 connect("test.joint_imp_out_port", "Franka.full_arm_JointImpedanceCtrl", cp);
 test.start();
