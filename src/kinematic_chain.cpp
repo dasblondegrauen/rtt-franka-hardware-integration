@@ -279,11 +279,12 @@ void KinematicChain::setImpedanceBehavior(const std::array<double, 7> &joint_imp
 
 Eigen::VectorXf& KinematicChain::convertImpedance(rstrt::dynamics::JointImpedance& input) {
     Eigen::VectorXf error = this->jf->joint_feedback.angles - impedance_q.angles;
-    this->impedance_tau.torques = -1.0 * input.stiffness.cwiseProduct(error)
+    this->impedance_tau.torques = (-1.0 * input.stiffness.cwiseProduct(this->jf->joint_feedback.angles - impedance_q.angles)
             - input.damping.cwiseProduct(this->jf->joint_feedback.velocities)
-            + Eigen::Map<Eigen::VectorXd>(this->franka_model->coriolis(this->franka_state).data(), this->dof).cast<float>();
+            + Eigen::Map<Eigen::VectorXd>(this->franka_model->coriolis(this->franka_state).data(), this->dof).cast<float>())
+        .cwiseMin(1000).cwiseMax(-1000);
 
-    return impedance_tau.torques;
+    return this->impedance_tau.torques;
 }
 
 std::string KinematicChain::printKinematicChainInformation() {

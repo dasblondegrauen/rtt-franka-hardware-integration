@@ -28,13 +28,13 @@ connect("test.joint_imp_out_port", "Franka.full_arm_JointImpedanceCtrl", cp)
 test.start()
 
 var rstrt.dynamics.JointImpedance imp = 7
-imp.stiffness[0] = 30
-imp.stiffness[1] = 30
-imp.stiffness[2] = 30
-imp.stiffness[3] = 30
-imp.stiffness[4] = 30
-imp.stiffness[5] = 30
-imp.stiffness[6] = 30
+imp.stiffness[0] = 50
+imp.stiffness[1] = 50
+imp.stiffness[2] = 50
+imp.stiffness[3] = 50
+imp.stiffness[4] = 50
+imp.stiffness[5] = 50
+imp.stiffness[6] = 50
 imp.damping[0] = 10
 imp.damping[1] = 10
 imp.damping[2] = 10
