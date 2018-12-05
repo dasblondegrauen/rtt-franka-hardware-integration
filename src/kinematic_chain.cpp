@@ -282,7 +282,7 @@ Eigen::VectorXf& KinematicChain::convertImpedance(rstrt::dynamics::JointImpedanc
     this->impedance_tau.torques = (-1.0 * input.stiffness.cwiseProduct(this->jf->joint_feedback.angles - impedance_q.angles)
             - input.damping.cwiseProduct(this->jf->joint_feedback.velocities)
             + Eigen::Map<Eigen::VectorXd>(this->franka_model->coriolis(this->franka_state).data(), this->dof).cast<float>())
-        .cwiseMin(1000).cwiseMax(-1000);
+        .cwiseMin(999).cwiseMax(-999);
 
     return this->impedance_tau.torques;
 }
