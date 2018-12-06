@@ -3,6 +3,9 @@
 
 #include <string>
 #include <rtt/Port.hpp>
+#include <rst-rt/dynamics/JointImpedance>
+#include <rst-rt/dynamics/JointTorque>
+#include <rst-rt/kinematics/JointAngles>
 
 namespace franka {
     enum ControlModes {Position, Velocity, Torque, Impedance};
@@ -48,6 +51,34 @@ namespace franka {
 
             Eigen::VectorXf &value() override {
                 return conversion(joint_cmd);
+            }
+    };
+
+    class JointImpedanceController: public BaseJointController {
+        public:
+            JointImpedanceController(const std::string &name,
+                    RTT::DataFlowInterface &ports,
+                    const ControlModes &control_name,
+                    std::function<Eigen::VectorXf& (rstrt::dynamics::JointImpedance&, rstrt::kinematics::JointAngles&, rstrt::dynamics::JointTorque&)> conversion_in)
+                : conversion(conversion_in) {
+                    // TODO
+                }
+
+            ~JointImpedanceController() {}
+
+            RTT::FlowStatus &read() override {
+                // TODO
+                return RTT::NoData;
+            }
+
+            bool connected() override {
+                // TODO
+                return false;
+            }
+
+            Eigen::VectorXf &value() override {
+                // TODO
+                return nullptr;
             }
     };
 
