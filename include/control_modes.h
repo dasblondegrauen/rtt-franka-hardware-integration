@@ -3,6 +3,7 @@
 
 #include <string>
 #include <rtt/Port.hpp>
+#include <Eigen/Core>
 #include <rst-rt/dynamics/JointImpedance>
 #include <rst-rt/dynamics/JointTorque>
 #include <rst-rt/kinematics/JointAngles>
@@ -31,6 +32,8 @@ namespace franka {
                 orocos_port.doc("Input for " + ControlModeMap.find(control_name)->second + "-cmds from Orocos to Franka.");
                 joint_cmd_fs = RTT::NoData;
                 ports.addPort(orocos_port);
+
+                joint_cmd_fs = RTT::NoData;
             }
 
             ~JointController() {}
@@ -56,30 +59,69 @@ namespace franka {
 
     class JointImpedanceController: public BaseJointController {
         public:
-            JointImpedanceController(const std::string &name,
-                    RTT::DataFlowInterface &ports,
-                    const ControlModes &control_name,
-                    std::function<Eigen::VectorXf& (rstrt::dynamics::JointImpedance&, rstrt::kinematics::JointAngles&, rstrt::dynamics::JointTorque&)> conversion_in)
-                : conversion(conversion_in) {
-                    // TODO
-                }
+        JointImpedanceController(const std::string &name,
+                                 RTT::DataFlowInterface &ports,
+                                 const ControlModes &control_name,
+                                 std::function<Eigen::VectorXf& (rstrt::dynamics::JointImpedance&, rstrt::kinematics::JointAngles&, rstrt::dynamics::JointTorque&)> conversion_in)
+            : conversion(conversion_in) {
+            impedance_port.setName(name + "_JointImpedanceCtrl");
+            impedance_port.doc("Input for JointImpedanceCtrl-cmds from Orocos to Franka.");
+            impedance_cmd_fs = RTT::NoData;
+            ports.addPort(impedance_port);
+
+            position_port.setName(name + "_JointPosition");
+            position_port.doc("Input for JointPosition-cmds from Orocos to Franka while in JointImpedanceCtrl");
+            position_cmd_fs = RTT::NoData;
+            ports.addPort(position_port);
+
+            torque_port.setName(name + "_JointTorque");
+            torque_port.doc("Input for JointTorque-cmds from Orocos to Franka while in JointImpedanceCtrl");
+            torque_cmd_fs = RTT::NoData;
+            ports.addPort(torque_port);
+
+            joint_cmd_fs = RTT::NoData;
+        }
 
             ~JointImpedanceController() {}
 
             RTT::FlowStatus &read() override {
-                // TODO
-                return RTT::NoData;
+                impedance_cmd_fs = impedance_port.read(impedance_cmd);
+                position_cmd_fs = position_port.read(position_cmd);
+                torque_cmd_fs = torque_port.read(torque_cmd);
+
+                if(impedance_cmd_fs != RTT::NoData) {
+                    joint_cmd_fs = impedance_cmd_fs;
+                } else if(position_cmd_fs != RTT::NoData) {
+                    joint_cmd_fs = position_cmd_fs;
+                } else if(torque_cmd_fs != RTT::NoData) {
+                    joint_cmd_fs = torque_cmd_fs;
+                } else {
+                    joint_cmd_fs == RTT::NoData;
+                }
+
+                return joint_cmd_fs;
             }
 
             bool connected() override {
-                // TODO
-                return false;
+                return impedance_port.connected();
             }
 
             Eigen::VectorXf &value() override {
-                // TODO
-                return nullptr;
+                return conversion(impedance_cmd, position_cmd, torque_cmd);
             }
+
+            RTT::InputPort<rstrt::dynamics::JointImpedance> impedance_port;
+            RTT::FlowStatus impedance_cmd_fs;
+            rstrt::dynamics::JointImpedance impedance_cmd;
+
+            RTT::InputPort<rstrt::kinematics::JointAngles> position_port;
+            RTT::FlowStatus position_cmd_fs;
+            rstrt::kinematics::JointAngles position_cmd;
+
+            RTT::InputPort<rstrt::dynamics::JointTorque> torque_port;
+            RTT::FlowStatus torque_cmd_fs;
+            rstrt::dynamics::JointTorque torque_cmd;
+
     };
 
     template < class T > class JointFeedback {
