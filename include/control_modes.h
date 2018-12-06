@@ -4,9 +4,9 @@
 #include <string>
 #include <rtt/Port.hpp>
 #include <Eigen/Core>
-#include <rst-rt/dynamics/JointImpedance>
-#include <rst-rt/dynamics/JointTorque>
-#include <rst-rt/kinematics/JointAngles>
+#include <rst-rt/dynamics/JointImpedance.hpp>
+#include <rst-rt/dynamics/JointTorques.hpp>
+#include <rst-rt/kinematics/JointAngles.hpp>
 
 namespace franka {
     enum ControlModes {Position, Velocity, Torque, Impedance};
@@ -62,7 +62,7 @@ namespace franka {
         JointImpedanceController(const std::string &name,
                                  RTT::DataFlowInterface &ports,
                                  const ControlModes &control_name,
-                                 std::function<Eigen::VectorXf& (rstrt::dynamics::JointImpedance&, rstrt::kinematics::JointAngles&, rstrt::dynamics::JointTorque&)> conversion_in)
+                                 std::function<Eigen::VectorXf& (rstrt::dynamics::JointImpedance&, rstrt::kinematics::JointAngles&, rstrt::dynamics::JointTorques&)> conversion_in)
             : conversion(conversion_in) {
             impedance_port.setName(name + "_JointImpedanceCtrl");
             impedance_port.doc("Input for JointImpedanceCtrl-cmds from Orocos to Franka.");
@@ -110,6 +110,8 @@ namespace franka {
                 return conversion(impedance_cmd, position_cmd, torque_cmd);
             }
 
+            std::function<Eigen::VectorXf& (rstrt::dynamics::JointImpedance&, rstrt::kinematics::JointAngles&, rstrt::dynamics::JointTorques&)> conversion;
+
             RTT::InputPort<rstrt::dynamics::JointImpedance> impedance_port;
             RTT::FlowStatus impedance_cmd_fs;
             rstrt::dynamics::JointImpedance impedance_cmd;
@@ -118,9 +120,9 @@ namespace franka {
             RTT::FlowStatus position_cmd_fs;
             rstrt::kinematics::JointAngles position_cmd;
 
-            RTT::InputPort<rstrt::dynamics::JointTorque> torque_port;
+            RTT::InputPort<rstrt::dynamics::JointTorques> torque_port;
             RTT::FlowStatus torque_cmd_fs;
-            rstrt::dynamics::JointTorque torque_cmd;
+            rstrt::dynamics::JointTorques torque_cmd;
 
     };
 
