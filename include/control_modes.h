@@ -58,7 +58,7 @@ namespace franka {
     };
 
     class JointImpedanceController: public BaseJointController {
-        public:
+    public:
         JointImpedanceController(const std::string &name,
                                  RTT::DataFlowInterface &ports,
                                  const ControlModes &control_name,
@@ -82,47 +82,47 @@ namespace franka {
             joint_cmd_fs = RTT::NoData;
         }
 
-            ~JointImpedanceController() {}
+        ~JointImpedanceController() {}
 
-            RTT::FlowStatus &read() override {
-                impedance_cmd_fs = impedance_port.read(impedance_cmd);
-                position_cmd_fs = position_port.read(position_cmd);
-                torque_cmd_fs = torque_port.read(torque_cmd);
+        RTT::FlowStatus &read() override {
+            impedance_cmd_fs = impedance_port.read(impedance_cmd);
+            position_cmd_fs = position_port.read(position_cmd);
+            torque_cmd_fs = torque_port.read(torque_cmd);
 
-                if(impedance_cmd_fs != RTT::NoData) {
-                    joint_cmd_fs = impedance_cmd_fs;
-                } else if(position_cmd_fs != RTT::NoData) {
-                    joint_cmd_fs = position_cmd_fs;
-                } else if(torque_cmd_fs != RTT::NoData) {
-                    joint_cmd_fs = torque_cmd_fs;
-                } else {
-                    joint_cmd_fs = RTT::NoData;
-                }
-
-                return joint_cmd_fs;
+            if(impedance_cmd_fs != RTT::NoData) {
+                joint_cmd_fs = impedance_cmd_fs;
+            } else if(position_cmd_fs != RTT::NoData) {
+                joint_cmd_fs = position_cmd_fs;
+            } else if(torque_cmd_fs != RTT::NoData) {
+                joint_cmd_fs = torque_cmd_fs;
+            } else {
+                joint_cmd_fs = RTT::NoData;
             }
 
-            bool connected() override {
-                return impedance_port.connected();
-            }
+            return joint_cmd_fs;
+        }
 
-            Eigen::VectorXf &value() override {
-                return conversion(impedance_cmd, position_cmd, torque_cmd);
-            }
+        bool connected() override {
+            return impedance_port.connected();
+        }
 
-            std::function<Eigen::VectorXf& (rstrt::dynamics::JointImpedance&, rstrt::kinematics::JointAngles&, rstrt::dynamics::JointTorques&)> conversion;
+        Eigen::VectorXf &value() override {
+            return conversion(impedance_cmd, position_cmd, torque_cmd);
+        }
 
-            RTT::InputPort<rstrt::dynamics::JointImpedance> impedance_port;
-            RTT::FlowStatus impedance_cmd_fs;
-            rstrt::dynamics::JointImpedance impedance_cmd;
+        std::function<Eigen::VectorXf& (rstrt::dynamics::JointImpedance&, rstrt::kinematics::JointAngles&, rstrt::dynamics::JointTorques&)> conversion;
 
-            RTT::InputPort<rstrt::kinematics::JointAngles> position_port;
-            RTT::FlowStatus position_cmd_fs;
-            rstrt::kinematics::JointAngles position_cmd;
+        RTT::InputPort<rstrt::dynamics::JointImpedance> impedance_port;
+        RTT::FlowStatus impedance_cmd_fs;
+        rstrt::dynamics::JointImpedance impedance_cmd;
 
-            RTT::InputPort<rstrt::dynamics::JointTorques> torque_port;
-            RTT::FlowStatus torque_cmd_fs;
-            rstrt::dynamics::JointTorques torque_cmd;
+        RTT::InputPort<rstrt::kinematics::JointAngles> position_port;
+        RTT::FlowStatus position_cmd_fs;
+        rstrt::kinematics::JointAngles position_cmd;
+
+        RTT::InputPort<rstrt::dynamics::JointTorques> torque_port;
+        RTT::FlowStatus torque_cmd_fs;
+        rstrt::dynamics::JointTorques torque_cmd;
 
     };
 
