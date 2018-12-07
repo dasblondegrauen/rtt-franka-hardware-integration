@@ -96,13 +96,11 @@ bool KinematicChain::setControlMode(const std::string &controlMode) {
     } else if(controlMode == franka::ControlModeMap.find(franka::ControlModes::Impedance)->second) {
         RTT::log(RTT::Info) << "Found mapping string" << RTT::endlog();
         current_control_mode = franka::ControlModes::Impedance;
-        jc = std::make_unique<franka::JointController<rstrt::dynamics::JointImpedance>>(kinematic_chain_name,
-                                                                                       this->ports,
-                                                                                       franka::ControlModes::Impedance,
-                                                                                       [this](rstrt::dynamics::JointImpedance &input) -> Eigen::VectorXf& {return this->convertImpedance(input); });
-        impedance_q_flow = RTT::NoData;
-        ports.addPort(kinematic_chain_name + "_JointImpedanceQ", impedance_q_port)
-                .doc("Input for JointImpedanceQ-cmds from Orocos to Franka.");
+        jc = std::make_unique<franka::JointImpedanceController>(kinematic_chain_name,
+                                                                this->ports,
+                                                                franka::ControlModes::Impedance,
+                                                                [this](rstrt::dynamics::JointImpedance &impedance_input, rstrt::kinematics::JointAngles &position_input, rstrt::dynamics::JointTorques &torque_input)
+                -> Eigen::VectorXf& {return this->convertImpedance(impedance_input, position_input, torque_input); });
         current_control_input_var = &(control_command.tau_J_d);
         RTT::log(RTT::Info) << "Set control mode to impedance" << RTT::endlog();
     } else {
@@ -150,10 +148,6 @@ bool KinematicChain::startKinematicChain() {
                                                 franka::MotionGeneratorTraits<franka::JointVelocities>::kMotionGeneratorMode,
                                                 kDefaultDeviation,
                                                 kDefaultDeviation);
-        impedance_q.angles.setZero(7);
-        for(size_t i = 0; i < dof; i++) {
-            impedance_q.angles(i) = franka_state.q_d.at(i);
-        }
         break;
     default:
         return false;
@@ -210,14 +204,6 @@ void KinematicChain::getCommand() {
         //RTT::log(RTT::Info) << RTT::endlog();
     } else {
         //RTT::log(RTT::Debug) << "No data from control input " << franka::ControlModeMap.find(current_control_mode)->second << RTT::endlog();
-    }
-
-    if(current_control_mode == franka::ControlModes::Impedance) {
-        if(impedance_q_port.connected()) {
-            impedance_q_flow = impedance_q_port.read(impedance_q);
-        } else {
-            RTT::log(RTT::Warning) << "No joint angles for impedance control supplied. Please connect JointImpedanceQ!" << RTT::endlog();
-        }
     }
 }
 
@@ -277,14 +263,16 @@ void KinematicChain::setImpedanceBehavior(const std::array<double, 7> &joint_imp
     static_cast<franka::Robot::Impl*>(franka_control.get())->executeCommand<research_interface::robot::SetCartesianImpedance>(cart_imp);
 }
 
-Eigen::VectorXf& KinematicChain::convertImpedance(rstrt::dynamics::JointImpedance& input) {
-    Eigen::VectorXf error = this->jf->joint_feedback.angles - impedance_q.angles;
-    this->impedance_tau.torques = (-1.0 * input.stiffness.cwiseProduct(this->jf->joint_feedback.angles - impedance_q.angles)
-            - input.damping.cwiseProduct(this->jf->joint_feedback.velocities)
-            + Eigen::Map<Eigen::VectorXd>(this->franka_model->coriolis(this->franka_state).data(), this->dof).cast<float>())
-        .cwiseMin(999).cwiseMax(-999);
+Eigen::VectorXf& KinematicChain::convertImpedance(rstrt::dynamics::JointImpedance& impedance_input,
+                                                  rstrt::kinematics::JointAngles& position_input,
+                                                  rstrt::dynamics::JointTorques& torque_input) {
+    this->tau_buffer.torques = (-1.0 * impedance_input.stiffness.cwiseProduct(this->jf->joint_feedback.angles - position_input.angles)
+                                   - impedance_input.damping.cwiseProduct(this->jf->joint_feedback.velocities)
+                                   + torque_input.torques
+                                   + Eigen::Map<Eigen::VectorXd>(this->franka_model->coriolis(this->franka_state).data(), this->dof).cast<float>())
+            .cwiseMin(999).cwiseMax(-999);
 
-    return this->impedance_tau.torques;
+    return this->tau_buffer.torques;
 }
 
 std::string KinematicChain::printKinematicChainInformation() {
