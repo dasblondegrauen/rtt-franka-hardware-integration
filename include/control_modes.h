@@ -96,7 +96,7 @@ namespace franka {
                 } else if(torque_cmd_fs != RTT::NoData) {
                     joint_cmd_fs = torque_cmd_fs;
                 } else {
-                    joint_cmd_fs == RTT::NoData;
+                    joint_cmd_fs = RTT::NoData;
                 }
 
                 return joint_cmd_fs;
