@@ -12,7 +12,7 @@
 #include <franka/robot_state.h>
 #include <franka/model.h>
 #include <franka/exception.h>
-#include <control_modes.h>
+#include <control_modes.hpp>
 #include <robot_impl.h>
 #include <motion_generator_traits.h>
 #include <research_interface/robot/rbk_types.h>

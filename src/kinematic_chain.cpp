@@ -1,7 +1,5 @@
-#include <kinematic_chain.h>
+#include <kinematic_chain.hpp>
 #include <string>
-#include <franka/lowpass_filter.h>
-#include <franka/rate_limiting.h>
 
 
 constexpr research_interface::robot::Move::Deviation KinematicChain::kDefaultDeviation;
