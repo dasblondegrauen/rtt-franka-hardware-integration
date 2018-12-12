@@ -65,6 +65,7 @@ namespace franka {
                                  const std::array<double, 7> &configuration,
                                  std::function<Eigen::VectorXf& (rstrt::dynamics::JointImpedance&, rstrt::kinematics::JointAngles&, rstrt::dynamics::JointTorques&)> conversion_in)
             : conversion(conversion_in) {
+
             impedance_port.setName(name + "_JointImpedanceCtrl");
             impedance_port.doc("Input for JointImpedanceCtrl-cmds from Orocos to Franka.");
             impedance_cmd_fs = RTT::NoData;
@@ -75,6 +76,7 @@ namespace franka {
             position_port.setName(name + "_JointPosition");
             position_port.doc("Input for JointPosition-cmds from Orocos to Franka while in JointImpedanceCtrl");
             position_cmd_fs = RTT::NoData;
+            position_cmd.angles.setZero(7);
 
             for(size_t i = 0; i < 7; i++) {
                 position_cmd.angles(i) = configuration.at(i);
@@ -98,16 +100,15 @@ namespace franka {
             position_cmd_fs = position_port.read(position_cmd);
             torque_cmd_fs = torque_port.read(torque_cmd);
 
-            RTT::log(RTT::Info) << impedance_cmd.stiffness.transpose() << "\n"
-                << impedance_cmd.damping.transpose() << "\n"
-                << position_cmd.angles.transpose() << RTT::endlog();
-
             if(impedance_cmd_fs != RTT::NoData) {
                 joint_cmd_fs = impedance_cmd_fs;
+                RTT::log(RTT::Info) << "Ipedance: " << impedance_cmd.stiffness.transpose() << "/" << impedance_cmd.damping.transpose() << RTT::endlog();
             } else if(position_cmd_fs != RTT::NoData) {
                 joint_cmd_fs = position_cmd_fs;
+                RTT::log(RTT::Info) << "Position: " << position_cmd.angles.transpose() << RTT::endlog();
             } else if(torque_cmd_fs != RTT::NoData) {
                 joint_cmd_fs = torque_cmd_fs;
+                RTT::log(RTT::Info) << "Torque: " << torque_cmd.torques.transpose() << RTT::endlog();
             } else {
                 joint_cmd_fs = RTT::NoData;
             }
