@@ -18,8 +18,8 @@
 #include <thread>
 #include <memory>
 
-#include <control_modes.h>
-#include "kinematic_chain.h"
+#include <control_modes.hpp>
+#include "kinematic_chain.hpp"
 #include <urdf_parser/urdf_parser.h>
 
 #include <srdfdom_advr/model.h>

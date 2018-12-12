@@ -98,6 +98,10 @@ namespace franka {
             position_cmd_fs = position_port.read(position_cmd);
             torque_cmd_fs = torque_port.read(torque_cmd);
 
+            RTT::log(RTT::Info) << impedance_cmd.stiffness.transpose() << "\n"
+                << impedance_cmd.damping.transpose() << "\n"
+                << position_cmd.angles.transpose() << RTT::endlog();
+
             if(impedance_cmd_fs != RTT::NoData) {
                 joint_cmd_fs = impedance_cmd_fs;
             } else if(position_cmd_fs != RTT::NoData) {
