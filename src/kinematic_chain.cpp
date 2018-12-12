@@ -99,6 +99,7 @@ bool KinematicChain::setControlMode(const std::string &controlMode) {
         jc = std::make_unique<franka::JointImpedanceController>(kinematic_chain_name,
                                                                 this->ports,
                                                                 franka::ControlModes::Impedance,
+                                                                franka_state.q_d,
                                                                 [this](rstrt::dynamics::JointImpedance &impedance_input, rstrt::kinematics::JointAngles &position_input, rstrt::dynamics::JointTorques &torque_input)
                 -> Eigen::VectorXf& {return this->convertImpedance(impedance_input, position_input, torque_input); });
         current_control_input_var = &(control_command.tau_J_d);
