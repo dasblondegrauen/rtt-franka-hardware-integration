@@ -57,6 +57,11 @@ void KinematicChain::setFeedBack() {
 
 bool KinematicChain::setControlMode(const std::string &controlMode) {
     RTT::log(RTT::Info) << "KC set control mode " << this->kinematic_chain_name << RTT::endlog();
+    if(!franka_control) {
+        return false;
+    }
+
+    franka_state = static_cast<franka::Robot::Impl*>(franka_control.get())->readOnce();
 
     motion_command = {};
     control_command = {};
@@ -115,7 +120,7 @@ bool KinematicChain::startKinematicChain() {
     }
 
     //franka_state = franka_control->update(nullptr, nullptr);
-    franka_state = static_cast<franka::Robot::Impl*>(franka_control.get())->readOnce();
+    //franka_state = static_cast<franka::Robot::Impl*>(franka_control.get())->readOnce();
 
     switch (current_control_mode) {
     case franka::ControlModes::Torque:

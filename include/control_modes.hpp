@@ -62,9 +62,10 @@ namespace franka {
         JointImpedanceController(const std::string &name,
                                  RTT::DataFlowInterface &ports,
                                  const ControlModes &control_name,
-                                 const std::array<double, 7> &configuration,
+                                 std::array<double, 7> q_d,
                                  std::function<Eigen::VectorXf& (rstrt::dynamics::JointImpedance&, rstrt::kinematics::JointAngles&, rstrt::dynamics::JointTorques&)> conversion_in)
             : conversion(conversion_in) {
+            initial_conf.angles = Eigen::Map<Eigen::VectorXd>(q_d.data(), 7).cast<float>();
 
             impedance_port.setName(name + "_JointImpedanceCtrl");
             impedance_port.doc("Input for JointImpedanceCtrl-cmds from Orocos to Franka.");
@@ -76,12 +77,7 @@ namespace franka {
             position_port.setName(name + "_JointPosition");
             position_port.doc("Input for JointPosition-cmds from Orocos to Franka while in JointImpedanceCtrl");
             position_cmd_fs = RTT::NoData;
-            position_cmd.angles.setZero(7);
-
-            for(size_t i = 0; i < 7; i++) {
-                position_cmd.angles(i) = configuration.at(i);
-            }
-
+            position_cmd.angles = initial_conf.angles;
             ports.addPort(position_port);
 
             torque_port.setName(name + "_JointTorque");
@@ -96,21 +92,29 @@ namespace franka {
         ~JointImpedanceController() {}
 
         RTT::FlowStatus &read() override {
-            impedance_cmd_fs = impedance_port.read(impedance_cmd);
-            position_cmd_fs = position_port.read(position_cmd);
-            torque_cmd_fs = torque_port.read(torque_cmd);
-
-            if(impedance_cmd_fs != RTT::NoData) {
+            if(impedance_port.connected()) {
+                impedance_cmd_fs = impedance_port.read(impedance_cmd);
                 joint_cmd_fs = impedance_cmd_fs;
-                RTT::log(RTT::Info) << "Ipedance: " << impedance_cmd.stiffness.transpose() << "/" << impedance_cmd.damping.transpose() << RTT::endlog();
-            } else if(position_cmd_fs != RTT::NoData) {
-                joint_cmd_fs = position_cmd_fs;
-                RTT::log(RTT::Info) << "Position: " << position_cmd.angles.transpose() << RTT::endlog();
-            } else if(torque_cmd_fs != RTT::NoData) {
-                joint_cmd_fs = torque_cmd_fs;
-                RTT::log(RTT::Info) << "Torque: " << torque_cmd.torques.transpose() << RTT::endlog();
-            } else {
-                joint_cmd_fs = RTT::NoData;
+            }
+
+            if(position_port.connected()) {
+                position_cmd_fs = position_port.read(position_cmd);
+
+                if(position_cmd_fs == RTT::NewData) {
+                    joint_cmd_fs = position_cmd_fs;
+                } else {
+                    position_cmd.angles = initial_conf.angles;
+                }
+
+                RTT::log(RTT::Info) << position_cmd.angles.transpose() << RTT::endlog();
+            }
+
+            if(torque_port.connected()) {
+                torque_cmd_fs = torque_port.read(torque_cmd);
+
+                if(torque_cmd_fs == RTT::NewData) {
+                    joint_cmd_fs = torque_cmd_fs;
+                }
             }
 
             return joint_cmd_fs;
@@ -138,6 +142,7 @@ namespace franka {
         RTT::FlowStatus torque_cmd_fs;
         rstrt::dynamics::JointTorques torque_cmd;
 
+        rstrt::kinematics::JointAngles initial_conf;
     };
 
     template < class T > class JointFeedback {
