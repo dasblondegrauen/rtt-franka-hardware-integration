@@ -4,7 +4,4 @@
 source ~/citk/systems/cogimon-minimal-nightly/bin/setup-cogimon-env.sh
 unset PYTHONPATH
 
-export RTT_COMPONENT_PATH=$RTT_COMPONENT_PATH:~/rtt-franka-hardware-integration/build/orocos:~/rtt-franka-hardware-integration/test/robot_data_test/build/src/orocos
-export GAZEBO_MODEL_PATH=~/cogimon-gazebo-models
-
-export RTT_COMPONENT_PATH=$RTT_COMPONENT_PATH:~/franka-test/JointPositionControl/build/src/orocos
+export RTT_COMPONENT_PATH=$RTT_COMPONENT_PATH:~/code/rtt-franka-hardware-integration/build/orocos:~/code/rtt-franka-hardware-integration/test/robot_data_test/build/src/orocos
