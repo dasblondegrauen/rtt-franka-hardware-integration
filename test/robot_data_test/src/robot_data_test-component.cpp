@@ -112,11 +112,13 @@ void Robot_data_test::updateHook() {
         } else if(gen_cosine) {
             *ramp_output = cos.getQ(current_time - start_time);
             write();
-        } else if(impedance_set) {
-            out_imp_port.write(out_imp_data);
         } else {
             lock = false;
             gen_cosine = false;
+        }
+
+        if(impedance_set) {
+            out_imp_port.write(out_imp_data);
         }
 
         // Do something with *ramp_output, so it does not get optimized out ¯\_(ツ)_/¯
