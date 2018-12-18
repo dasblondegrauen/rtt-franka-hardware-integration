@@ -100,8 +100,9 @@ namespace franka {
             if(position_port.connected()) {
                 position_cmd_fs = position_port.read(position_cmd);
 
-                if(position_cmd_fs == RTT::NewData) {
+                if(position_cmd_fs == RTT::NewData && position_cmd.angles.size() == 7) {
                     joint_cmd_fs = position_cmd_fs;
+                    initial_conf.angles = position_cmd.angles;
                 } else {
                     position_cmd.angles = initial_conf.angles;
                 }
