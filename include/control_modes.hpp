@@ -96,7 +96,6 @@ namespace franka {
                 if(impedance_cmd_fs == RTT::NewData) {
                     impedance_cmd.stiffness = impedance_buf.stiffness;
                     impedance_cmd.damping = impedance_buf.damping;
-                    RTT::log(RTT::Info) << impedance_cmd.stiffness.transpose() << "/" << impedance_cmd.damping.transpose() << RTT::endlog();
                 }
 
                 joint_cmd_fs = impedance_cmd_fs;
@@ -108,7 +107,6 @@ namespace franka {
                 if(position_cmd_fs == RTT::NewData) {
                     position_cmd.angles = position_buf.angles;
                     joint_cmd_fs = position_cmd_fs;
-                    RTT::log(RTT::Info) << position_cmd.angles.transpose() << RTT::endlog();
                 }
             }
 
