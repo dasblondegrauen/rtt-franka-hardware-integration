@@ -17,6 +17,7 @@ Robot_data_test::Robot_data_test(std::string const& name) : TaskContext(name) {
     coriolis_in_data.setZero(7);
     this->addPort("coriolis_in_port", coriolis_in_port);
 
+    addOperation("setMode", &Robot_data_test::setMode, this, RTT::ClientThread);
     addOperation("setValue", &Robot_data_test::setValue, this, RTT::ClientThread);
     addOperation("setSingleValue", &Robot_data_test::setSingleValue, this, RTT::ClientThread);
     addOperation("ramp", &Robot_data_test::ramp, this, RTT::ClientThread);
@@ -127,7 +128,7 @@ void Robot_data_test::setMode(const std::string& mode) {
     } else if(mode == "position") {
         ramp_input = &(joint_state_in_data.angles);
         ramp_output = &(out_pos_data.angles);
-        ramp_output = ramp_input;
+        *ramp_output = *ramp_input;
     } else if(mode == "velocity") {
         ramp_input = &(joint_state_in_data.velocities);
         ramp_output = &(out_vel_data.velocities);
