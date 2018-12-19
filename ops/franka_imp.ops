@@ -25,6 +25,7 @@ connect("test.joint_vals_in_port", "Franka.full_arm_JointFeedback", cp)
 test.configure()
 connect("test.joint_imp_out_port", "Franka.full_arm_JointImpedanceCtrl", cp)
 connect("test.joint_pos_out_port", "Franka.full_arm_JointPosition", cp)
+connect("test.joint_trq_out_port", "Franka.full_arm_JointTorque", cp)
 test.start()
 
 var rstrt.dynamics.JointImpedance imp = 7

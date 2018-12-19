@@ -67,27 +67,9 @@ bool Robot_data_test::configureHook() {
 }
 
 bool Robot_data_test::startHook() {
-    if(out_pos_port.connected()) {
-        RTT::log(RTT::Info) << "Starting test component in position mode" << RTT::endlog();
-        ramp_input = &(joint_state_in_data.angles);
-        ramp_output = &(out_pos_data.angles);
-    } else if(out_vel_port.connected()) {
-        RTT::log(RTT::Info) << "Starting test component in velocity mode" << RTT::endlog();
-        ramp_input = &(joint_state_in_data.velocities);
-        ramp_output = &(out_vel_data.velocities);
-    } else if(out_imp_port.connected()) {
-        RTT::log(RTT::Info) << "Starting test component in impedance mode" << RTT::endlog();
-        ramp_input = &(joint_state_in_data.angles);
-        ramp_output = &(out_pos_data.angles);
-    } else {
-        if(!out_trq_port.connected()) {
-            RTT::log(RTT::Info) << "No output port connected, falling back to default" << RTT::endlog();
-        }
-
-        RTT::log(RTT::Info) << "Starting test component in torque mode" << RTT::endlog();
-        ramp_input = &(out_trq_data.torques);
-        ramp_output = &(out_trq_data.torques);
-    }
+    RTT::log(RTT::Info) << "Starting test component in torque mode" << RTT::endlog();
+    ramp_input = &(out_trq_data.torques);
+    ramp_output = &(out_trq_data.torques);
 
     return true;
 }
@@ -136,6 +118,25 @@ void Robot_data_test::cleanupHook() {
     out_pos_data.angles.setZero();
     out_imp_data.stiffness.setZero();
     out_imp_data.damping.setZero();
+}
+
+void Robot_data_test::setMode(const std::string& mode) {
+    if(mode == "torque") {
+        ramp_input = &(joint_state_in_data.torques);
+        ramp_output = &(out_trq_data.torques);
+    } else if(mode == "position") {
+        ramp_input = &(joint_state_in_data.angles);
+        ramp_output = &(out_pos_data.angles);
+        ramp_output = ramp_input;
+    } else if(mode == "velocity") {
+        ramp_input = &(joint_state_in_data.velocities);
+        ramp_output = &(out_vel_data.velocities);
+    } else {
+        RTT::log(RTT::Warning) << "Could not set unkown mode " << mode << RTT::endlog();
+        return;
+    }
+
+    RTT::log(RTT::Info) << mode << " mode set!" << RTT::endlog();
 }
 
 void Robot_data_test::setValue(int idx, float val) {

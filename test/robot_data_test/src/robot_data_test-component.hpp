@@ -52,6 +52,7 @@ private:
     Eigen::VectorXf* ramp_input, *ramp_output;
     double current_time = 0, end_time = 0, start_time = 0;
     bool value_set, single_value_set, lock, gen_cosine, impedance_set;
+    void setMode(const std::string& mode);
     void setValue(int idx, float val);
     void setSingleValue(int idx, float val);
     void ramp(int idx, float target, double time);
