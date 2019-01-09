@@ -35,6 +35,14 @@ private:
     RTT::FlowStatus coriolis_in_flow;
     Eigen::VectorXf coriolis_in_data;
 
+    RTT::InputPort<Eigen::MatrixXf> inertia_in_port;
+    RTT::FlowStatus inertia_in_flow;
+    Eigen::MatrixXf inertia_in_data; // 7x7
+
+    RTT::InputPort<Eigen::MatrixXf> jacobian_in_port;
+    RTT::FlowStatus jacobian_in_flow;
+    Eigen::MatrixXf jacobian_in_data; // 6x7
+
     RTT::OutputPort<rstrt::dynamics::JointTorques> out_trq_port;
     rstrt::dynamics::JointTorques out_trq_data;
 
