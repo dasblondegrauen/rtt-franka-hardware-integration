@@ -231,7 +231,7 @@ bool franka_robot::addChain(std::string name, std::string robot_ip,
     std::string chain_name = _xbotcore_model.get_chain_names()[0];
     RTT::log(RTT::Info) << chain_name << " :chain" << RTT::endlog();
 
-    // get the enabled joints. ################################################################## TODO DUPLICATE!!!
+    // get the enabled joints.
     std::vector<std::string> enabled_joints_in_chain;
     _xbotcore_model.get_enabled_joints_in_chain(chain_name,
                                                 enabled_joints_in_chain);

@@ -23,8 +23,7 @@ bool KinematicChain::initKinematicChain() {
     setCollisionBehavior(
     {{1000.0, 1000.0, 1000.0, 1000.0, 1000.0, 1000.0, 1000.0}}, {{1000.0, 1000.0, 1000.0, 1000.0, 1000.0, 1000.0, 1000.0}},
     {{1000.0, 1000.0, 1000.0, 1000.0, 1000.0, 1000.0}}, {{1000.0, 1000.0, 1000.0, 1000.0, 1000.0, 1000.0}});
-    //{{20.0, 20.0, 18.0, 18.0, 16.0, 14.0, 12.0}}, {{20.0, 20.0, 18.0, 18.0, 16.0, 14.0, 12.0}},
-    //{{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}}, {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}});
+
     //TODO testing, values below should be set from srdf file
     setImpedanceBehavior({3000, 3000, 3000, 2500, 2500, 2000, 2000}, {3000, 3000, 3000, 300, 300, 300});
 
@@ -119,9 +118,6 @@ bool KinematicChain::startKinematicChain() {
         return false;
     }
 
-    //franka_state = franka_control->update(nullptr, nullptr);
-    //franka_state = static_cast<franka::Robot::Impl*>(franka_control.get())->readOnce();
-
     switch (current_control_mode) {
     case franka::ControlModes::Torque:
         RTT::log(RTT::Info) << "STARTED KINEMATIC CHAIN IN MODE: " << franka::ControlModeMap.find(franka::ControlModes::Torque)->second << RTT::endlog();
@@ -161,9 +157,6 @@ bool KinematicChain::startKinematicChain() {
 }
 
 bool KinematicChain::sense() {
-    //auto time = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now().time_since_epoch());
-    //RTT::log(RTT::Info) << "SENSE: " << time.count() % 60000000 << " ";
-
     jf->joint_feedback.angles = Eigen::Map<Eigen::VectorXd>(franka_state.q.data(), dof).cast<float>();
     jf->joint_feedback.velocities = Eigen::Map<Eigen::VectorXd>(franka_state.dq.data(), dof).cast<float>();
     jf->joint_feedback.torques = Eigen::Map<Eigen::VectorXd>(franka_state.tau_J.data(), dof).cast<float>();
@@ -180,7 +173,6 @@ bool KinematicChain::sense() {
     if (jacobian_feedback->connected())
         jacobian_feedback->dynamicFeedback = Eigen::Map<Eigen::MatrixXd>(franka_model->zeroJacobian(franka::Frame::kFlange,franka_state).data(), 6, dof).cast<float>();
 
-    //RTT::log(RTT::Info) << "WRITE! Control command success rate: " << franka_state.control_command_success_rate << RTT::endlog();
     jf->write();
     if(franka_state.control_command_success_rate>0.8){
         if (inertia_feedback->connected())
@@ -198,14 +190,9 @@ bool KinematicChain::sense() {
 
 void KinematicChain::getCommand() {    
     if (jc->connected() && jc->read() == RTT::NewData) {
-        //auto time = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now().time_since_epoch());
-        //RTT::log(RTT::Info) << "GETCMD " << time.count() % 60000000 << " ";
-
         for (size_t i = 0; i < 7; i++) {
             (*current_control_input_var)[i] = static_cast<double>(jc->value()(i));
-            //RTT::log(RTT::Info) << current_control_input_var->at(i) << " ";
         }
-        //RTT::log(RTT::Info) << RTT::endlog();
     } else {
         //RTT::log(RTT::Debug) << "No data from control input " << franka::ControlModeMap.find(current_control_mode)->second << RTT::endlog();
     }
@@ -226,9 +213,6 @@ void KinematicChain::stop() try {
 
 void KinematicChain::move() try {
     if (jc->connected() && jc->joint_cmd_fs == RTT::NewData) {
-        //auto time = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now().time_since_epoch());
-        //RTT::log(RTT::Info) << "MOVE: " << time.count() % 60000000 << " ";
-
         if(current_control_mode == franka::ControlModes::Torque || current_control_mode == franka::ControlModes::Impedance) {
             franka_state = franka_control->update(&motion_command, &control_command);
         } else {
@@ -238,8 +222,6 @@ void KinematicChain::move() try {
         franka_state = franka_control->update(nullptr, nullptr);
     }
 
-    //auto time = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now().time_since_epoch());
-    //RTT::log(RTT::Info) << "ERROR? " << time.count() % 60000000 << RTT::endlog();
     franka_control->throwOnMotionError(franka_state, motion_id);
 } catch (const franka::NetworkException &exc) {
     RTT::log(RTT::Error) << "NETWORK: " << exc.what() << RTT::endlog();
