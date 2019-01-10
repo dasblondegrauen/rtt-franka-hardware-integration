@@ -206,8 +206,11 @@ void Robot_data_test::print() {
     grav_in_flow = grav_in_port.read(grav_in_data);
     coriolis_in_flow = coriolis_in_port.read(coriolis_in_data);
 
-    std::cout << "Gravity: " << grav_in_data.transpose() <<
-        "\nCoriolis: " << coriolis_in_data.transpose() << std::endl;
+    std::cout << "Gravity: " << grav_in_data.transpose() << std::endl;
+    std::cout << "Coriolis: " << coriolis_in_data.transpose() << std::endl;
+
+    std::cout << "Inertia: " << inertia_in_data << std::endl;
+    std::cout << "Jacobian: " << jacobian_in_data << std::endl;
 }
 
 /*
