@@ -26,6 +26,10 @@ test.configure()
 connect("test.joint_imp_out_port", "Franka.full_arm_JointImpedanceCtrl", cp)
 connect("test.joint_pos_out_port", "Franka.full_arm_JointPosition", cp)
 connect("test.joint_trqs_out_port", "Franka.full_arm_JointTorque", cp)
+connect("Franka.full_arm_GravityFeedback", "test.grav_in_port", cp)
+connect("Franka.full_arm_CoriolisFeedback", "test.coriolis_in_port", cp)
+connect("Franka.full_arm_InertiaFeedback", "test.inertia_in_port", cp)
+connect("Franka.full_arm_JacobianFeedback", "test.jacobian_in_port", cp)
 test.start()
 
 var rstrt.dynamics.JointImpedance imp = 7
@@ -45,3 +49,4 @@ imp.damping[5] = 10
 imp.damping[6] = 10
 
 test.setFullImpedance(imp)
+test.setMode("position")
