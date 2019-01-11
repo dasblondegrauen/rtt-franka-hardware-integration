@@ -22,7 +22,7 @@ Robot_data_test::Robot_data_test(std::string const& name) : TaskContext(name) {
     this->addPort("inertia_in_port", inertia_in_port);
 
     jacobian_in_flow = RTT::NoData;
-    jacobian_in_data.setZero(7, 7);
+    jacobian_in_data.setZero(6, 7);
     this->addPort("jacobian_in_port", jacobian_in_port);
 
     addOperation("setMode", &Robot_data_test::setMode, this, RTT::ClientThread);
@@ -205,12 +205,14 @@ void Robot_data_test::setFullImpedance(const rstrt::dynamics::JointImpedance &im
 void Robot_data_test::print() {
     grav_in_flow = grav_in_port.read(grav_in_data);
     coriolis_in_flow = coriolis_in_port.read(coriolis_in_data);
+    inertia_in_flow = inertia_in_port.read(inertia_in_data);
+    jacobian_in_flow = jacobian_in_port.read(jacobian_in_data);
 
     std::cout << "Gravity: " << grav_in_data.transpose() << std::endl;
     std::cout << "Coriolis: " << coriolis_in_data.transpose() << std::endl;
 
-    std::cout << "Inertia: " << inertia_in_data << std::endl;
-    std::cout << "Jacobian: " << jacobian_in_data << std::endl;
+    std::cout << "Inertia:\n" << inertia_in_data << std::endl;
+    std::cout << "Jacobian:\n" << jacobian_in_data << std::endl;
 }
 
 /*
