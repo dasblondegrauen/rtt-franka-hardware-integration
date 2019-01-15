@@ -212,7 +212,7 @@ void KinematicChain::stop() try {
 }
 
 void KinematicChain::move() try {
-    if (jc->connected() && jc->joint_cmd_fs == RTT::NewData) {
+    if (jc->connected() && jc->joint_cmd_fs != RTT::NoData) {
         if(current_control_mode == franka::ControlModes::Torque || current_control_mode == franka::ControlModes::Impedance) {
             franka_state = franka_control->update(&motion_command, &control_command);
         } else {
