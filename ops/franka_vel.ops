@@ -25,3 +25,4 @@ connect("test.joint_vals_in_port", "Franka.full_arm_JointFeedback", cp);
 test.configure();
 connect("test.joint_vels_out_port", "Franka.full_arm_JointVelocityCtrl", cp);
 test.start();
+test.setMode("velocity")
