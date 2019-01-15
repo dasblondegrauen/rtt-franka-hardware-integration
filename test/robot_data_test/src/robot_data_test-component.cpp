@@ -40,8 +40,7 @@ Robot_data_test::Robot_data_test(std::string const& name) : TaskContext(name) {
     gen_cosine = false;
     impedance_set = false;
 
-    ramp_input = &(joint_state_in_data.torques);
-    ramp_output = &(out_trq_data.torques);
+    this->setMode("torque");
 }
 
 bool Robot_data_test::configureHook() {
@@ -52,7 +51,7 @@ bool Robot_data_test::configureHook() {
     out_imp_data.damping.setZero(7);
 
     joint_state_in_flow = joint_state_in_port.read(joint_state_in_data);
-    if(joint_state_in_flow == RTT::NewData) {
+    if(joint_state_in_flow != RTT::NoData) {
         out_pos_data.angles = joint_state_in_data.angles;
         out_vel_data.velocities = joint_state_in_data.velocities;
 
@@ -76,10 +75,6 @@ bool Robot_data_test::configureHook() {
 }
 
 bool Robot_data_test::startHook() {
-    RTT::log(RTT::Info) << "Starting test component in torque mode" << RTT::endlog();
-    ramp_input = &(out_trq_data.torques);
-    ramp_output = &(out_trq_data.torques);
-
     return true;
 }
 
@@ -129,19 +124,29 @@ void Robot_data_test::cleanupHook() {
     out_imp_data.damping.setZero();
 }
 
-void Robot_data_test::setMode(const std::string& mode) {
+void Robot_data_test::setMode(const std::string mode) {
+    joint_state_in_flow = joint_state_in_port.read(joint_state_in_data);
+
     if(mode == "torque") {
+        out_trq_data.torques.setZero(7);
         ramp_input = &(joint_state_in_data.torques);
         ramp_output = &(out_trq_data.torques);
     } else if(mode == "position") {
+        out_pos_data.angles = joint_state_in_data.angles;
         ramp_input = &(joint_state_in_data.angles);
         ramp_output = &(out_pos_data.angles);
-        *ramp_output = *ramp_input;
     } else if(mode == "velocity") {
+        out_vel_data.velocities = joint_state_in_data.velocities;
         ramp_input = &(joint_state_in_data.velocities);
         ramp_output = &(out_vel_data.velocities);
     } else {
-        RTT::log(RTT::Warning) << "Could not set unkown mode " << mode << RTT::endlog();
+        RTT::log(RTT::Warning) << "Could not set unkown mode " << mode
+            << "\nFalling back to torque mode" << RTT::endlog();
+
+        out_trq_data.torques.setZero();
+        ramp_input = &(joint_state_in_data.torques);
+        ramp_output = &(out_trq_data.torques);
+
         return;
     }
 
@@ -167,8 +172,8 @@ void Robot_data_test::ramp(int idx, float target, double time) {
 
     end_time = current_time + time;
 
-    Eigen::VectorXf start_conf = Eigen::VectorXf(*ramp_input);
-    Eigen::VectorXf end_conf = start_conf;
+    Eigen::VectorXf start_conf = ramp_input == &(joint_state_in_data.torques) ? Eigen::VectorXf::Zero(7) : Eigen::VectorXf(*ramp_input);
+    Eigen::VectorXf end_conf = Eigen::VectorXf(start_conf);
     end_conf(idx) = target;
 
     qp = QuinticPolynomial<float>(current_time, end_time, start_conf, end_conf);
