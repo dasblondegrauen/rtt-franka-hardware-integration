@@ -99,6 +99,9 @@ void Robot_data_test::updateHook() {
             *ramp_output = cos.getQ(current_time - start_time);
             write();
         } else {
+            out_pos_data.angles = joint_state_in_data.angles;
+            out_vel_data.velocities = joint_state_in_data.velocities;
+
             lock = false;
             gen_cosine = false;
         }
@@ -172,7 +175,7 @@ void Robot_data_test::ramp(int idx, float target, double time) {
 
     end_time = current_time + time;
 
-    Eigen::VectorXf start_conf = ramp_input == &(joint_state_in_data.torques) ? Eigen::VectorXf::Zero(7) : Eigen::VectorXf(*ramp_input);
+    Eigen::VectorXf start_conf = Eigen::VectorXf(*ramp_output);
     Eigen::VectorXf end_conf = Eigen::VectorXf(start_conf);
     end_conf(idx) = target;
 
