@@ -92,6 +92,9 @@ void Robot_data_test::updateHook() {
         } if(single_value_set) {
             write();
             single_value_set = false;
+
+            out_pos_data.angles = joint_state_in_data.angles;
+            out_vel_data.velocities = joint_state_in_data.velocities;
         } else if(current_time < end_time) {
             *ramp_output = qp.getQ(current_time);
             write();
@@ -99,11 +102,10 @@ void Robot_data_test::updateHook() {
             *ramp_output = cos.getQ(current_time - start_time);
             write();
         } else {
+            lock = false;
+
             out_pos_data.angles = joint_state_in_data.angles;
             out_vel_data.velocities = joint_state_in_data.velocities;
-
-            lock = false;
-            gen_cosine = false;
         }
 
         if(impedance_set) {
@@ -120,11 +122,7 @@ void Robot_data_test::stopHook() {
 }
 
 void Robot_data_test::cleanupHook() {
-    out_trq_data.torques.setZero();
-    out_vel_data.velocities.setZero();
-    out_pos_data.angles.setZero();
-    out_imp_data.stiffness.setZero();
-    out_imp_data.damping.setZero();
+
 }
 
 void Robot_data_test::setMode(const std::string mode) {
@@ -157,13 +155,11 @@ void Robot_data_test::setMode(const std::string mode) {
 }
 
 void Robot_data_test::setValue(int idx, float val) {
-    *ramp_output = Eigen::VectorXf(*ramp_input);
     (*ramp_output)(idx) = val;
     value_set = true;
 }
 
 void Robot_data_test::setSingleValue(int idx, float val) {
-    *ramp_output = Eigen::VectorXf(*ramp_input);
     (*ramp_output)(idx) = val;
     single_value_set = true;
 }
@@ -191,7 +187,7 @@ void Robot_data_test::cosine(int idx, double amplitude, double period) {
     Eigen::VectorXf amplitudes = Eigen::VectorXf::Zero(7);
     amplitudes(idx) = amplitude;
 
-    cos = Cosine<float>(Eigen::VectorXf(*ramp_input), amplitudes, period);
+    cos = Cosine<float>(Eigen::VectorXf(*ramp_output), amplitudes, period);
     gen_cosine = true;
 }
 
