@@ -4,4 +4,4 @@
 source ~/citk/systems/cogimon-minimal-nightly/bin/setup-cogimon-env.sh
 unset PYTHONPATH
 
-export RTT_COMPONENT_PATH=$RTT_COMPONENT_PATH:~/code/rtt-franka-hardware-integration/build/orocos:~/code/rtt-franka-hardware-integration/test/robot_data_test/build/src/orocos
+export RTT_COMPONENT_PATH=$RTT_COMPONENT_PATH:~/code/rtt-franka-hardware-integration/build/orocos:~/code/generic_controller/build/src/orocos
