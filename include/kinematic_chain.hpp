@@ -47,12 +47,24 @@ class KinematicChain {
          */
         std::string getKinematicChainName();
 
+        /**
+         * Gets the Degree of Freedom of the kinematic chain
+         * @return DoF of the kinematic chain
+         */
         unsigned int getNumberOfDOFs();
 
+        /**
+         * Gets the current control mode of the kinematic chain
+         * @return Current control mode of the kinematic chain as string
+         */
         const std::string &getCurrentControlMode();
 
         // std::vector < std::string > &getJointNames();
 
+        /**
+         * Detects available controllers of the robot
+         * @return Available controllers as vector of strings
+         */
         std::vector < std::string > getControllersAvailable() {
             std::vector < std::string > output;
             for (auto const &x : franka::ControlModeMap) {
@@ -61,32 +73,81 @@ class KinematicChain {
             return output;
         }
 
+        /**
+         * Initializes the kinematic chain
+         * @return true if successful, false otherwise
+         */
         bool initKinematicChain();
 
+        /**
+         * Resets the kinematic chain
+         * @return true if successful, false otherwise
+         */
         bool resetKinematicChain();
 
+        /**
+         * Starts the kinematic chain.
+         * Initializes a motion as well as motion/control commands according to the current control mode
+         * @return true if successful, false otherwise
+         */
         bool startKinematicChain();
 
+        /**
+         * Initializes feedback ports.
+         * Gets called automatically by initKinematicChain()
+         */
         void setFeedBack();
 
+        /**
+         * Set control mode of the kinematic chain.
+         * Has to be called before the chain is started by startKinematicChain()
+         * @return true if successful, false otherwise
+         */
         bool setControlMode(const std::string &controlMode);
 
+        /**
+         * Receive current state of robot and write to feedback ports
+         * @return true if successful, false otherwise
+         */
         bool sense();
 
+        /**
+         * Read command from JointController/input port and transfer to current_control_input_var
+         */
         void getCommand();
 
+        /**
+         * Try to execute the previously receibed motion/control command by sending it to the robot
+         * May throw TODO
+         */
         void move();
 
+        /**
+         * Try to finish/abort current motion and stop the kinematic chain.
+         * May throw TODO
+         */
         void stop();
 
+        /**
+         * Print information about the kinematic chain into a string
+         * @return A String with information about the kinematic chain
+         */
         std::string printKinematicChainInformation();
 
+        /**
+         * Set internal collision behaviour
+         * TODO
+         */
 	void setCollisionBehavior(const std::array<double, 7>& lower_torque_thresholds,
                                  const std::array<double, 7>& upper_torque_thresholds,
                                  const std::array<double, 6>& lower_force_thresholds,
                                  const std::array<double, 6>& upper_force_thresholds);
 
-    void setImpedanceBehavior(const std::array<double,7> & joint_imp,const std::array<double,6> & cart_imp);
+        /**
+         * Set internal impedance behaviour
+         * TODO
+         */
+        void setImpedanceBehavior(const std::array<double,7> & joint_imp,const std::array<double,6> & cart_imp);
 
     private:
         std::string kinematic_chain_name;
