@@ -122,6 +122,7 @@ include_directories(include
 # )
 
 orocos_component(rtt_franka_hw src/rtt-franka-robot_hooks.cpp src/rtt-franka-robot.cpp src/kinematic_chain.cpp)
+target_compile_options(rtt_franka_hw PRIVATE -Wall -Wextra -Wpedantic)
 set_target_properties(rtt_franka_hw PROPERTIES COMPILE_DEFINITIONS RTT_COMPONENT)
 target_link_libraries(rtt_franka_hw
   ${orocos_kdl_LIBRARIES}
