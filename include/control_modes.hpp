@@ -9,7 +9,14 @@
 #include <rst-rt/kinematics/JointAngles.hpp>
 
 namespace franka {
+    /**
+     * Enum of implemented control modes for the kinematic chain
+     */
     enum ControlModes {Position, Velocity, Torque, Impedance};
+
+    /**
+     * Mapping of ControlModes values to string representations
+     */
     static const std::map < ControlModes, std::string > ControlModeMap = {
         {Position, "JointPositionCtrl"},
         {Velocity, "JointVelocityCtrl"},
@@ -17,14 +24,21 @@ namespace franka {
         {Impedance, "JointImpedanceCtrl"}
     };
 
+    /**
+     * Abstract base class for joint controllers of the kinematic chain
+     */
     class BaseJointController {
         public:
             virtual RTT::FlowStatus &read() = 0;
             virtual bool connected() = 0;
             virtual Eigen::VectorXf &value() = 0;
-            RTT::FlowStatus joint_cmd_fs;
+            RTT::FlowStatus joint_cmd_fs = RTT::NoData;
     };
 
+    /**
+     * Generic joint controller.
+     * Used for torque control of the kinematic chain
+     */
     template < class T > class JointController: public BaseJointController {
         public:
             JointController(const std::string &name, RTT::DataFlowInterface &ports, const ControlModes &control_name, std::function < Eigen::VectorXf & (T &) > conversion_in) : conversion(conversion_in) {
@@ -57,6 +71,11 @@ namespace franka {
             }
     };
 
+    /**
+     * Specialized joint controller for impedance control.
+     * A generic implementation of the joint congroller does not suffice,
+     * since additional input and computation is required for impedance control
+     */
     class JointImpedanceController: public BaseJointController {
     public:
         JointImpedanceController(const std::string &name,
