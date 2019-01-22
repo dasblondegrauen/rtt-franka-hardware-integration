@@ -118,6 +118,7 @@ bool franka_robot::setControlMode(const std::string &kinematic_chain,
     return kinematic_chains[kinematic_chain]->setControlMode(controlMode);
 }
 
+// TODO Is this method still necessary?
 void franka_robot::setGravity(const std::string &kinematic_chain, const bool g) {
     // std::vector<std::string> chain_names = getKinematicChains();
     if (!(std::find(chain_names.begin(), chain_names.end(), kinematic_chain)

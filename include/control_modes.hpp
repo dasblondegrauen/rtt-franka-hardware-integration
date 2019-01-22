@@ -86,8 +86,8 @@ namespace franka {
                                  std::array<double, 7> q_d,
                                  std::function<Eigen::VectorXf& (rstrt::dynamics::JointImpedance&, rstrt::kinematics::JointAngles&, rstrt::dynamics::JointTorques&)> conversion_in)
             : conversion(conversion_in) {
-            impedance_port.setName(name + "_JointImpedanceCtrl");
-            impedance_port.doc("Input for JointImpedanceCtrl-cmds from Orocos to Franka.");
+            impedance_port.setName(name + "_" + ControlModeMap.find(control_name)->second);
+            impedance_port.doc("Input for " + ControlModeMap.find(control_name)->second + "-cmds from Orocos to Franka");
             impedance_cmd_fs = RTT::NoData;
             impedance_cmd.stiffness.setZero(7);
             impedance_cmd.damping.setZero(7);
