@@ -118,13 +118,13 @@ class KinematicChain {
 
         /**
          * Try to execute the previously receibed motion/control command by sending it to the robot
-         * May throw TODO
+         * May throw franka::NetworkException, franka::ControlException, franka::ProtocolException on error.
          */
         void move();
 
         /**
          * Try to finish/abort current motion and stop the kinematic chain.
-         * May throw TODO
+         * May throw any exception occuring during that process.
          */
         void stop();
 
@@ -135,8 +135,7 @@ class KinematicChain {
         std::string printKinematicChainInformation();
 
         /**
-         * Set internal collision behaviour
-         * TODO
+         * Set internal collision detection thresholds
          */
 	void setCollisionBehavior(const std::array<double, 7>& lower_torque_thresholds,
                                  const std::array<double, 7>& upper_torque_thresholds,
@@ -144,8 +143,8 @@ class KinematicChain {
                                  const std::array<double, 6>& upper_force_thresholds);
 
         /**
-         * Set internal impedance behaviour
-         * TODO
+         * Set internal joint and cartesion impedance values.
+         * Only affects operation in position and velocity modes
          */
         void setImpedanceBehavior(const std::array<double,7> & joint_imp,const std::array<double,6> & cart_imp);
 
