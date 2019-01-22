@@ -25,7 +25,8 @@ namespace franka {
     };
 
     /**
-     * Abstract base class for joint controllers of the kinematic chain
+     * Abstract base class for joint controllers of the kinematic chain.
+     * A joint controller manages input ports and forwards received commands to the kinematic chain.
      */
     class BaseJointController {
         public:
@@ -37,6 +38,7 @@ namespace franka {
 
     /**
      * Generic joint controller.
+     * Processes commands from input ports for usage by the kinematic chain.
      * Used for torque control of the kinematic chain
      */
     template < class T > class JointController: public BaseJointController {
@@ -73,8 +75,8 @@ namespace franka {
 
     /**
      * Specialized joint controller for impedance control.
-     * A generic implementation of the joint congroller does not suffice,
-     * since additional input and computation is required for impedance control
+     * Processes commands from input ports for usage by the kinematic chain.
+     * A generic implementation of the joint congroller does not suffice, since additional input and computation is required for impedance control
      */
     class JointImpedanceController: public BaseJointController {
     public:
@@ -164,6 +166,9 @@ namespace franka {
         rstrt::dynamics::JointTorques torque_buf, torque_cmd;
     };
 
+    /**
+     * Class to forward joint feedback from kinematic chain to output ports.
+     */
     template < class T > class JointFeedback {
         public:
             JointFeedback(std::string name, RTT::DataFlowInterface &ports, std::string feedback_name, std::function < void(T &) > initalization) {
@@ -188,6 +193,9 @@ namespace franka {
             }
     };
 
+    /**
+     * Class to forward dynamic feedback from kinematic chain to output ports
+     */
     template < class T > class DynamicFeedback {
         public:
             DynamicFeedback(std::string name, RTT::DataFlowInterface &ports, std::string feedback_name, std::function < void(T &) > initalization) {
