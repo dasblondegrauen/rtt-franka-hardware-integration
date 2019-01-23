@@ -50,3 +50,23 @@ franka.start()
 # TODO
 # Connect your own component to the feedback and command ports of franka and control the robot!
 ```
+
+## Features
+
+### Working
+- Control modes
+    - Joint velocity (`JointVelocityCtrl`)
+    - Joint torque (`JointTorqueCtrl`)
+    - Joint impedance (`JointIpedanceCtrl`)
+- Joint state feedback
+    - Position
+    - Velocity
+    - Torque
+- Dynamic feedback
+    - Manipulator jacobian
+    - Inertia/mass matrix
+    - Gravity vector
+    - Coriolis vector
+
+### Not working
+- Joint position control (`JointPositionCtrl`)
