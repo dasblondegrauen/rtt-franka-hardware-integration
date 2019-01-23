@@ -13,8 +13,8 @@ franka_robot::franka_robot(const std::string &name) :
     this->addOperation("setControlMode", &franka_robot::setControlMode, this,
                        RTT::ClientThread);
 
-    this->addOperation("setGravity", &franka_robot::setGravity, this,
-                       RTT::ClientThread);
+    //this->addOperation("setGravity", &franka_robot::setGravity, this,
+    //                   RTT::ClientThread);
 
     // this->addOperation("setDebug", &franka_robot::setDebug, this,
     //                    RTT::ClientThread);
@@ -118,16 +118,15 @@ bool franka_robot::setControlMode(const std::string &kinematic_chain,
     return kinematic_chains[kinematic_chain]->setControlMode(controlMode);
 }
 
-// TODO Is this method still necessary?
-void franka_robot::setGravity(const std::string &kinematic_chain, const bool g) {
-    // std::vector<std::string> chain_names = getKinematicChains();
-    if (!(std::find(chain_names.begin(), chain_names.end(), kinematic_chain)
-          != chain_names.end())) {
-        log(Warning) << "Kinematic Chain " << kinematic_chain
-                     << " is not available!" << endlog();
-    }
-    // kinematic_chains[kinematic_chain]->setGravity(g);
-}
+//void franka_robot::setGravity(const std::string &kinematic_chain, const bool g) {
+//    // std::vector<std::string> chain_names = getKinematicChains();
+//    if (!(std::find(chain_names.begin(), chain_names.end(), kinematic_chain)
+//          != chain_names.end())) {
+//        log(Warning) << "Kinematic Chain " << kinematic_chain
+//                     << " is not available!" << endlog();
+//    }
+//    // kinematic_chains[kinematic_chain]->setGravity(g);
+//}
 
 bool franka_robot::getModel(const std::string &model_name) {
     if (model) {
