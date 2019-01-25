@@ -207,7 +207,9 @@ void KinematicChain::stop() try {
 } catch (...) {
     try {
         franka_control->cancelMotion(motion_id);
-    } catch (...) {}
+    } catch (...) {
+        static_cast<franka::Robot::Impl*>(franka_control.get())->executeCommand<research_interface::robot::AutomaticErrorRecovery>();
+    }
     throw;
 }
 
