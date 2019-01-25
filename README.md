@@ -69,4 +69,8 @@ franka.start()
     - Coriolis vector
 
 ### Not working
-- Joint position control (`JointPositionCtrl`)
+- Joint position control (`JointPositionCtrl`) \
+  Robot reports errors due to joint velocity and acceleration discontinuities even in case clearly smooth trajectories are commanded and handed to *libfranka*. Root cause of this problem is unkown up to now.
+
+## Source code
+See [HACKING.md](HACKING.md) for information about code structure and implementation details.
