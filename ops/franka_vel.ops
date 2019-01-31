@@ -2,7 +2,7 @@ import("eigen_typekit")
 import("kdl_typekit")
 import("rst-rt_typekit")
 import("rtt-franka-hardware-integration")
-import("robot_data_test")
+import("rtt-generic-test-controller")
 require("os")
 
 var string path_model_urdf = os.getenv("GAZEBO_MODEL_PATH") + "/franka/model.urdf";
@@ -16,7 +16,7 @@ Franka.setControlMode("Franka", "JointVelocityCtrl");
 Franka.configure();
 Franka.start();
 
-loadComponent("test", "Robot_data_test");
+loadComponent("test", "TestController");
 setActivity("test", 0.00055555, 80, ORO_SCHED_RT);
 
 var ConnPolicy cp

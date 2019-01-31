@@ -2,7 +2,7 @@ import("eigen_typekit")
 import("kdl_typekit")
 import("rst-rt_typekit")
 import("rtt-franka-hardware-integration")
-import("rtt_generic_test_controller")
+import("rtt-generic-test-controller")
 require("os")
 
 var string path_model_urdf = os.getenv("GAZEBO_MODEL_PATH") + "/franka/model.urdf"
